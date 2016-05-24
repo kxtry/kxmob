@@ -3,11 +3,11 @@
 
 #include "kxmob_global.h"
 
-class KXMOBSHARED_EXPORT Kxmob
+class KXFW_API KxMob
 {
-
 public:
-    Kxmob();
+    static void init();
+    static void destroy();
 };
 
 #endif // KXMOB_H
