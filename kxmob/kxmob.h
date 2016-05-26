@@ -1,7 +1,5 @@
-#ifndef KXMOB_H
+﻿#ifndef KXMOB_H
 #define KXMOB_H
-
-#include "kxmob_global.h"
 
 class KXFW_API KxMob
 {

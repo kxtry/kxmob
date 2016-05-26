@@ -1,12 +1,58 @@
-#ifndef KXMOB_GLOBAL_H
-#define KXMOB_GLOBAL_H
+﻿#ifndef _KXMOB_GLOBAL_H_
+#define _KXMOB_GLOBAL_H_
 
-#include <QtCore/qglobal.h>
+/* Qt library */
+#include <QtGlobal>
+#include <QtCore>
+#include <QObject>
 
-#if defined(KXMOB_LIBRARY)
-#  define KXFW_API Q_DECL_EXPORT
+#include <QPoint>
+#include <QPointF>
+#include <QRect>
+#include <QMargins>
+#include <QPointer>
+#include <QColor>
+#include <QIcon>
+#include <QLatin1String>
+#include <QString>
+#include <QStringList>
+#include <QVector>
+#include <QPair>
+#include <QVariant>
+#include <QPixmap>
+#include <QEvent>
+#include <QGraphicsWidget>
+#include <QGraphicsView>
+#include <QFontMetrics>
+#include <QFontMetricsF>
+#include <QGraphicsLinearLayout>
+#include <QGraphicsAnchorLayout>
+#include <QGraphicsColorizeEffect>
+#include <QLineEdit>
+#include <QGraphicsProxyWidget>
+#include <QTextFormat>
+#include <QTextOption>
+#include <QTextCursor>
+#include <QFontDatabase>
+#include <QFrame>
+#include <QDateTime>
+#include <QDate>
+#include <QTime>
+#include <QDebug>
+
+
+#ifdef KXFW_LIB
+# define KXFW_API Q_DECL_EXPORT
 #else
-#  define KXFW_API Q_DECL_IMPORT
+# define KXFW_API Q_DECL_IMPORT
 #endif
 
-#endif // KXMOB_GLOBAL_H
+/* private */
+#include "kdatadef.h"
+
+inline void qDeleteLater(QObject *obj)
+{
+    QMetaObject::invokeMethod(obj, "deleteLater", Qt::QueuedConnection);
+}
+
+#endif

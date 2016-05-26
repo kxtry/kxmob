@@ -4,17 +4,23 @@
 #
 #-------------------------------------------------
 
-QT       += widgets
+QT += core gui
+QT += widgets
 
 TARGET = kxmob
 TEMPLATE = lib
 
-DEFINES += KXMOB_LIBRARY
+DEFINES += KXFW_LIB
 
-SOURCES += kxmob.cpp
+PRECOMPILED_HEADER = stable.h
+SOURCES += kxmob.cpp \
+    kwidget.cpp
 
 HEADERS += kxmob.h\
-        kxmob_global.h
+        kxmob_global.h \
+    kdatadef.h \
+    kwidget.h \
+    kwidget_p.h
 
 unix {
     target.path = /usr/lib

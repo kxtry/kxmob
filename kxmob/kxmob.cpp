@@ -1,4 +1,6 @@
+﻿#include "stable.h"
 #include "kxmob.h"
+
 #include <QFont>
 #include <QApplication>
 #include <QTextCodec>
