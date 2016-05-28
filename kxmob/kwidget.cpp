@@ -1,6 +1,10 @@
 ﻿#include "stable.h"
+
+#include <QCoreApplication>
+
 #include "kwidget.h"
 #include "kwidget_p.h"
+
 
 
 KWidgetPrivate::KWidgetPrivate()
@@ -56,7 +60,7 @@ KWidget::~KWidget()
 {
     if(d_ptr->bRemovePostEvent)
     {
-        QApplication::removePostedEvents(this);
+        QCoreApplication::removePostedEvents(this);
     }
     delete d_ptr;
 }
@@ -185,7 +189,6 @@ void KWidget::setBackgroundColor( int r, int g, int b, int a /*= 255*/ )
 
 QBrush KWidget::backgroundBrush() const
 {
-    Q_D(const KWidget);
     QPalette p = palette();
     return p.brush(QPalette::Window);
 }
@@ -212,6 +215,52 @@ void KWidget::setBackgroundStyle( Qt::BrushStyle bs )
         return;
     d->backgroundBrush.setStyle(bs);
     updateBackgroundBrush();
+}
+
+KWidget::QtGradient KWidget::backgroundGradient() const
+{
+	Q_D(const KWidget);
+	return QtGradient();
+}
+
+void KWidget::setBackgroundGradient( const KWidget::QtGradient& gd )
+{
+	Q_D(KWidget);
+	QBrush brush;
+	switch(gd.t)
+	{
+	case QGradient::LinearGradient:
+		{
+			QLinearGradient lg(gd.d.l.startx, gd.d.l.starty, gd.d.l.finalx, gd.d.l.finaly);
+			lg.setCoordinateMode(QGradient::ObjectBoundingMode);
+			lg.setSpread(gd.spread);
+			lg.setStops(gd.gs);
+			brush = QBrush(lg);
+		}
+		break;
+	case QGradient::ConicalGradient:
+		{
+			QConicalGradient cg(gd.d.c.centerx, gd.d.c.centery,gd.d.c.angle);
+			cg.setCoordinateMode(QGradient::ObjectBoundingMode);
+			cg.setSpread(gd.spread);
+			cg.setStops(gd.gs);
+			brush = QBrush(cg);
+		}
+		break;
+	case QGradient::RadialGradient:
+		{
+			QRadialGradient rg(gd.d.r.centerx, gd.d.r.centery,gd.d.r.radius);
+			rg.setCoordinateMode(QGradient::ObjectBoundingMode);
+			rg.setSpread(gd.spread);
+			rg.setStops(gd.gs);
+			brush = QBrush(rg);
+		}
+		break;
+	}
+	if(d->backgroundBrush == brush)
+		return;
+	d->backgroundBrush = brush;
+	updateBackgroundBrush();
 }
 
 KWidget::LayoutType KWidget::layoutType()
@@ -453,7 +502,7 @@ void KWidget::insertItem( KWidget *item, int i )
 {
     addObjectItem(item);
     addGraphicsItem(item);
-    insertLayoutItem(item, 0);
+    insertLayoutItem(item, i);
 }
 
 void KWidget::removeItem( KWidget *item )
@@ -601,6 +650,7 @@ KWidget::DragPolicy KWidget::dragPolicy() const
 
 KWidget::DragPolicy KWidget::hitTest( const QPointF& point )
 {
+    Q_UNUSED(point);
     Q_D(const KWidget);
     return d->dragPolicy;
 }
@@ -884,13 +934,6 @@ bool KWidget::hasTheme()
         {
             return d->bThemeResult;
         }
-#ifdef _DEBUG
-        QString objName = objectName();
-        if(objName == "PushButtonBk")
-        {
-            int i = 0;
-        }
-#endif
         d->bThemeCheck = true;
         QGraphicsItem *itemParent = parentItem();
         while(itemParent)
@@ -901,13 +944,8 @@ bool KWidget::hasTheme()
                 itemParent = itemParent->parentItem();
                 continue;
             }
-#ifdef _DEBUG
             QString objName = widgetParent->objectName();
-            if(objName == "btn1")
-            {
-                int i = 0;
-            }
-#endif
+
             ThemePolicy scp = widgetParent->themePolicy();
             if(scp == NoTheme)
             {
@@ -930,7 +968,6 @@ bool KWidget::hasTheme()
 
 QVariant KWidget::itemChange( GraphicsItemChange change, const QVariant & value )
 {
-    Q_D(KWidget);
     if(change == QGraphicsItem::ItemParentHasChanged
         || change == QGraphicsItem::ItemParentChange)
     {

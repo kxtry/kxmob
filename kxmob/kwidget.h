@@ -12,6 +12,35 @@ class KWidgetPrivate;
 class KWidget : public QGraphicsWidget
 {
 public:
+    struct QtGradient
+    {
+        QGradient::Type t;
+        union
+        {
+            struct
+            {
+                qreal startx, starty;
+                qreal finalx, finaly;
+            } l;
+            struct
+            {
+                qreal centerx,centery;
+                qreal radius;
+            } r;
+            struct
+            {
+                qreal centerx,centery;
+                qreal angle;
+            } c;
+        } d;
+        QGradientStops gs;
+        QGradient::Spread spread;
+        QtGradient()
+        {
+            t = QGradient::NoGradient;
+        }
+    };
+
     enum DragPolicy
     {
         Nothing = 0,
@@ -189,6 +218,8 @@ public:
     Qt::BrushStyle backgroundStyle() const;
     void setBackgroundStyle(Qt::BrushStyle bs);
 
+    KWidget::QtGradient backgroundGradient() const;
+    void setBackgroundGradient(const KWidget::QtGradient& gd);
 
     void unsetBackgroundBrush();
 

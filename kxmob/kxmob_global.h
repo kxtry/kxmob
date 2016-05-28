@@ -2,8 +2,8 @@
 #define _KXMOB_GLOBAL_H_
 
 /* Qt library */
-#include <QApplication>
-#include <QtCore/QtGlobal>
+#include <QtGlobal>
+#include <QtCore>
 #include <QObject>
 
 #include <QPoint>
@@ -21,8 +21,6 @@
 #include <QVariant>
 #include <QPixmap>
 #include <QEvent>
-#include <QGraphicsWidget>
-#include <QGraphicsView>
 #include <QFontMetrics>
 #include <QFontMetricsF>
 #include <QGraphicsLinearLayout>
@@ -41,19 +39,12 @@
 #include <QDebug>
 #include <QMetaEnum>
 
+#include <QGraphicsWidget>
+#include <QGraphicsView>
 
-//#ifdef KXFW_LIB
-//# define KXFW_API Q_DECL_EXPORT
-//#else
-//# define KXFW_API Q_DECL_IMPORT
-//#endif
-
-/* private */
-#include "kdatadef.h"
 
 inline void qDeleteLater(QObject *obj)
 {
     QMetaObject::invokeMethod(obj, "deleteLater", Qt::QueuedConnection);
 }
-
 #endif

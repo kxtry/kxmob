@@ -4,6 +4,7 @@
 #include "kwidget.h"
 
 class KWidget;
+class QGraphicsColorizeEffect;
 
 class KWidgetPrivate
 {

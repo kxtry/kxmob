@@ -1,6 +1,5 @@
 ﻿#include "stable.h"
 #include "kxmob.h"
-#include "widget.h"
 
 #include <QFont>
 #include <QApplication>
@@ -18,16 +17,4 @@ void KxMob::init()
 void KxMob::destroy()
 {
 
-}
-
-
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
-    Widget w;
-    w.show();
-
-    KxMob::init();
-
-    return a.exec();
 }
