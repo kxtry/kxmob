@@ -9,7 +9,7 @@ QT += widgets
 TARGET = kxmob
 TEMPLATE = lib
 
-CONFIG += staticlib
+DEFINES += KXFW_LIB
 
 SOURCES += kxmob.cpp \
     kwidget.cpp
@@ -19,8 +19,9 @@ PRECOMPILED_HEADER = stable.h
 HEADERS += kxmob.h\
     kwidget.h \
     kwidget_p.h \
-    kxmob_global.h \
-    stable.h
+    stable.h \
+    kxapi.h \
+    kxglobal.h
 
 unix {
     target.path = /usr/lib

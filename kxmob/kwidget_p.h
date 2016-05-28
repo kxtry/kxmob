@@ -1,12 +1,13 @@
 ﻿#ifndef _KWIDGET_P_H_
 #define _KWIDGET_P_H_
 
+#include "kxapi.h"
 #include "kwidget.h"
 
 class KWidget;
 class QGraphicsColorizeEffect;
 
-class KWidgetPrivate
+class KXFW_API KWidgetPrivate
 {
     Q_DECLARE_PUBLIC(KWidget)
 

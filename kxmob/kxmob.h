@@ -1,7 +1,9 @@
 ﻿#ifndef KXMOB_H
 #define KXMOB_H
 
-class KxMob
+#include "kxapi.h"
+
+class KXFW_API KxMob
 {
 public:
     static void init();

@@ -47,4 +47,5 @@ inline void qDeleteLater(QObject *obj)
 {
     QMetaObject::invokeMethod(obj, "deleteLater", Qt::QueuedConnection);
 }
+
 #endif

@@ -1,6 +1,7 @@
 ﻿#ifndef _KWIDGET_H_
 #define _KWIDGET_H_
 
+#include "kxapi.h"
 #include <QGraphicsWidget>
 
 class QGraphicsLayout;
@@ -9,7 +10,7 @@ struct XMLNode;
 
 class KWidgetPrivate;
 
-class KWidget : public QGraphicsWidget
+class KXFW_API KWidget : public QGraphicsWidget
 {
 public:
     struct QtGradient
