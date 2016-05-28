@@ -41,6 +41,8 @@
 
 #include <QGraphicsWidget>
 #include <QGraphicsView>
+#include <QCoreApplication>
+#include <QApplication>
 
 
 inline void qDeleteLater(QObject *obj)

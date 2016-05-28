@@ -1,4 +1,7 @@
-#pragma once;
+ï»¿#ifndef _KWINDOW_H_
+#define _KWINDOW_H_
+
+#include "kxapi.h"
 
 class KWidget;
 class KSpacer;
@@ -51,11 +54,11 @@ public:
 
 public slots:
 	/*
-	WidgetÉèÖÃÁËWA_DeleteOnCloseÊôĞÔºó¡£
-	ÖØĞ´closeÊÂ¼ş£¬Ä¿µÄÊÇÓÉÓÚÔÚÒ»Ğ©ÌØÊâÌõÏÂ£¬ÀıÈçIE»òFlashµÄscript»Øµ÷ÀïÖ±½Óµ÷ÓÃQt£¬ÓÉÓÚÊÇÔËĞĞ±ê×¼µÄWIN32ÏûÏ¢£¬
-	Ã»ÓĞÖ±½Ó¾­¹ıQtÄÚ²¿µ¼ÖÂthreadµÄloopLevelÎª1£¬´ËÊ±¶øµ¼ÖÂµ÷ÓÃdeleteLaterÎŞĞ§¡£
-	Ö»ÊÊºÏnewµÄ¶ÔÏó²Ù×÷¡£
-	Èç¹ûÊÇÕ»¶ÔÏó£¬ÔòĞèÒªµ÷ÓÃskipMyCloseExecution();
+	Widgetè®¾ç½®äº†WA_DeleteOnCloseå±æ€§åã€‚
+	é‡å†™closeäº‹ä»¶ï¼Œç›®çš„æ˜¯ç”±äºåœ¨ä¸€äº›ç‰¹æ®Šæ¡ä¸‹ï¼Œä¾‹å¦‚IEæˆ–Flashçš„scriptå›è°ƒé‡Œç›´æ¥è°ƒç”¨Qtï¼Œç”±äºæ˜¯è¿è¡Œæ ‡å‡†çš„WIN32æ¶ˆæ¯ï¼Œ
+	æ²¡æœ‰ç›´æ¥ç»è¿‡Qtå†…éƒ¨å¯¼è‡´threadçš„loopLevelä¸º1ï¼Œæ­¤æ—¶è€Œå¯¼è‡´è°ƒç”¨deleteLateræ— æ•ˆã€‚
+	åªé€‚åˆnewçš„å¯¹è±¡æ“ä½œã€‚
+	å¦‚æœæ˜¯æ ˆå¯¹è±¡ï¼Œåˆ™éœ€è¦è°ƒç”¨skipMyCloseExecution();
 	*/
 	virtual void close();
 	virtual void showNormal();
@@ -83,8 +86,7 @@ protected:
 	virtual void showEvent(QShowEvent *event);
 	virtual void hideEvent(QHideEvent *event);
 	virtual void themeChange(KThemeChangeEvent *event);
-	virtual bool event(QEvent * e);
-	virtual bool winEvent(MSG *message, long *result);
+    virtual bool event(QEvent * e);
 
 	void doThemeChange();
 
@@ -97,3 +99,5 @@ protected:
 	KWindowPrivate * d_ptr;
 
 };
+
+#endif

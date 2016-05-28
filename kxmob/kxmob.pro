@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += widgets
+QT += widgets xml
 
 TARGET = kxmob
 TEMPLATE = lib
@@ -12,7 +12,13 @@ TEMPLATE = lib
 DEFINES += KXFW_LIB
 
 SOURCES += kxmob.cpp \
-    kwidget.cpp
+    kwidget.cpp \
+    kwindow.cpp \
+    kspacer.cpp \
+    kxmlui.cpp \
+    kresource.cpp \
+    kutility.cpp \
+    khelper.cpp
 
 PRECOMPILED_HEADER = stable.h
 
@@ -21,7 +27,14 @@ HEADERS += kxmob.h\
     kwidget_p.h \
     stable.h \
     kxapi.h \
-    kxglobal.h
+    kxglobal.h \
+    kwindow.h \
+    kspacer.h \
+    kxmlui.h \
+    kresource.h \
+    kutility.h \
+    khelper.h \
+    khelper_p.h
 
 unix {
     target.path = /usr/lib

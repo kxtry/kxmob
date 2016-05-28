@@ -1,14 +1,19 @@
-#include "stdafx.h"
+ï»¿#include "stable.h"
 #include "kwindow.h"
 #include "kspacer.h"
-#include "kxmlui.h"
-#include "kwindow_p.h"
-#include "ktheme.h"
+//#include "kxmlui.h"
 
-KX_WINDOW_CREATOR_GLOBAL_STATIC(KWindow);
+//#include "ktheme.h"
+
+#include "kwindow_p.h"
+
+//KX_WINDOW_CREATOR_GLOBAL_STATIC(KWindow);
+
 
 KWindowPrivate::KWindowPrivate()
 {
+	//è¿™å‡½æ•°ä¸ºFLALSæ—¶çš„ä½œç”¨ï¼Œä¼šå¯¼è‡´IEçš„AxWidgetåœ¨è°ƒç”¨setParentæ—¶ï¼Œè§¦å‘æ‰€æœ‰Childå‡ä¸ºNativeWindow.
+	QApplication::setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 	m_bStopMyCloseExecution = false;
 }
 
@@ -23,12 +28,21 @@ void KWindowPrivate::init()
 	Q_Q(KWindow);
 
 	m_isClosing = false;
-    q->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    q->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	q->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	q->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	q->setRealWindow(false);
 	QString style = q->styleSheet();
 	q->setStyleSheet( "QGraphicsView { border-style: none}" );
 	scene = new QGraphicsScene(q);
-    q->setScene(scene);
+	q->setScene(scene);
+	root = new KSpacer(NULL);
+	root->setLayoutType(KWidget::VBox);
+	root->setDragPolicy(KWidget::WindowMove);
+	root->setFlag(QGraphicsItem::ItemClipsChildrenToShape);
+	root->setParent(scene);
+	scene->addItem(root);
+	bool bOk = QObject::connect(&m_timerUpdate, SIGNAL(timeout()), q, SLOT(on_viewport_update_bugfix()));
+	q->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
 }
 
 
@@ -75,17 +89,17 @@ KWindow::~KWindow()
 
 bool KWindow::event(QEvent * e)
 {
-	if(e->type() == KThemeChangeEvent::EventType)
-	{
-		themeChange((KThemeChangeEvent*)e);
-		return true;
-	}
-	else if(e->type() == QEvent::Move)
-	{
-		emit posChanged();
-		return true;
-	}
-	return __super::event(e);
+//	if(e->type() == KThemeChangeEvent::EventType)
+//	{
+//		themeChange((KThemeChangeEvent*)e);
+//		return true;
+//	}
+//	else if(e->type() == QEvent::Move)
+//	{
+//		emit posChanged();
+//		return true;
+//	}
+    return QGraphicsView::event(e);
 }
 
 void KWindow::closeEvent( QCloseEvent *event )
@@ -137,6 +151,23 @@ void KWindow::construct()
 	doThemeChange();
 }
 
+void KWindow::setRealWindow( bool on )
+{
+	/*
+	å½“ä½¿ç”¨Qt::Windowæ—¶ï¼Œä¸€å®šæ˜¯åˆ›å»ºçª—å£çš„ã€‚ä¸”æ˜¯å¼¹å‡ºå¼çª—å£ï¼Œ
+	å¦‚æœè¦ä½¿å®ƒæ˜¯å­çª—å£ä¸”æ˜¯çœŸçª—å£ï¼Œåˆ™åªæœ‰ä½¿ç”¨NativeWindowå’ŒWidgetç»„åˆæ‰è¡Œã€‚
+	*/
+	/*
+	åªè¦å…·æœ‰Windowå±æ€§ï¼Œå°±ä¸€å®šæ˜¯å¼¹å‡ºçª—å£,å®ƒä¸èƒ½ä¸WA_NativeWindowä¸€èµ·ä½¿ç”¨ã€‚åœ¨Qtä¸­çš„æ¦‚å¿µwidgetä¸ºå­çª—å£ï¼ŒWindowä¸ºå¼¹å‡ºçª—å£ã€‚
+	è€ŒNativeWindowæ˜¯å¼ºè°ƒWidgetçª—å£ä¸ºå­çª—å£ï¼Œä¸”NativeWindowä¼šå¯¼è‡´è¯¥çª—å£å¾ˆå®¹æ˜“å°±é‡å¤çš„åˆ›å»ºã€‚
+	*/
+	setAttribute(Qt::WA_NativeWindow, on);
+	Qt::WindowFlags flags = windowFlags();
+	flags &= ~Qt::Window;
+	flags |= Qt::Widget;
+	setWindowFlags(flags);
+}
+
 void KWindow::abortCloseWindow()
 {
 	d_func()->m_bCancelClose = true;
@@ -145,14 +176,16 @@ void KWindow::abortCloseWindow()
 void KWindow::showEvent( QShowEvent *event )
 {
 	Q_D(KWindow);
-	__super::showEvent(event);
+    QGraphicsView::showEvent(event);
+	d->m_timerUpdate.start(512);
 	emit visibleChanged();
 }
 
 void KWindow::hideEvent( QHideEvent *event )
 {
 	Q_D(KWindow);
-	__super::hideEvent(event);
+    QGraphicsView::hideEvent(event);
+	d->m_timerUpdate.stop();
 	emit visibleChanged();
 }
 
@@ -189,12 +222,12 @@ void KWindow::close()
 
 	if(d->m_bStopMyCloseExecution)
 	{
-		__super::close();
+        QGraphicsView::close();
 		return;
 	}
 
 	if(d->m_isClosing)
-		return;//×ÔÒÑ¼ÓÒ»²ã±£»¤ÒÔ·ÀÖ¹m_bCancelClose±»¸´¸Ç¡£
+		return;//è‡ªå·²åŠ ä¸€å±‚ä¿æŠ¤ä»¥é˜²æ­¢m_bCancelCloseè¢«å¤ç›–ã€‚
 	d->m_isClosing = true;
 	d->m_bCancelClose = false;
 	bool bAutoDelete = testAttribute(Qt::WA_DeleteOnClose);
@@ -202,7 +235,7 @@ void KWindow::close()
 	{
 		setAttribute(Qt::WA_DeleteOnClose, false);
 	}
-	__super::close();
+    QGraphicsView::close();
 	if(bAutoDelete)
 	{
 		if(!d->m_bCancelClose)
@@ -218,37 +251,34 @@ void KWindow::close()
 }
 
 /*
-ÓÉÓÚwin7µÄAeroSnapÌØĞÔÓ°Ïì£¬¿ÉÄÜ»áµ¼ÖÂQtÄÚ²¿µÄ×î´ó»¯×îĞ¡»¯´°¿ÚÊ§³£¡£
+ç”±äºwin7çš„AeroSnapç‰¹æ€§å½±å“ï¼Œå¯èƒ½ä¼šå¯¼è‡´Qtå†…éƒ¨çš„æœ€å¤§åŒ–æœ€å°åŒ–çª—å£å¤±å¸¸ã€‚
 */
 void KWindow::showNormal()
 {
-	//__super::showNormal();
-	::ShowWindow(winId(), SW_NORMAL);
+    QGraphicsView::showNormal();
 }
 
 void KWindow::showMaximized()
 {
-	//__super::showMaximized();
-	::ShowWindow(winId(), SW_MAXIMIZE);
+    QGraphicsView::showMaximized();
 }
 
 void KWindow::showMinimized()
 {
-	//__super::showMinimized();
-	::ShowWindow(winId(), SW_MINIMIZE);
+    QGraphicsView::showMinimized();
 }
 
 void KWindow::showMaximizeOrRestore()
 {
-	if(::IsMaximized(winId()))
-	{
-		::ShowWindow(winId(), SW_RESTORE);
-	}
-	else
-	{
-		//showMaximized();
-		::ShowWindow(winId(), SW_MAXIMIZE);
-	}
+//	if(::IsMaximized(winId()))
+//	{
+//		::ShowWindow(winId(), SW_RESTORE);
+//	}
+//	else
+//	{
+//		//showMaximized();
+//		::ShowWindow(winId(), SW_MAXIMIZE);
+//	}
 }
 
 void KWindow::setFontSize( int fs )
@@ -299,7 +329,7 @@ bool KWindow::bold() const
 void KWindow::setFont( const QFont& f )
 {
 	Q_D(KWindow);
-	__super::setFont(f);
+    QGraphicsView::setFont(f);
 	d->setFont(f);
 }
 
@@ -326,29 +356,9 @@ QString KWindow::skinName() const
 
 void KWindow::setSkinName( const QString& name )
 {
-	KTheme::setSkinName(this, name);
+//	KTheme::setSkinName(this, name);
 }
 
-bool KWindow::winEvent( MSG *pMsg, long *result )
-{
-	if(pMsg->message == WM_LBUTTONDOWN)
-	{
-		QGraphicsScene *gs = scene();
-		while(gs && !gs->isActive())
-		{
-			/*
-			ÖĞÎÄÊäÈë·¨BUG-fixed.
-			ÖĞÎÄÊäÈë·¨¹²ÓĞÁ½´¦BUG£¬´ËÊÇÒ»´¦£¬ÁíÒ»´¦ÊÇinputMethodEventÖĞµÄÊôĞÔµ¼ÖÂ¡£
-			µ±QEvent::WindowActivate±»±ğµÄ¶ÔÏó³Ôµô»òQEvent::WindowDeactivateÊÂ¼ş±»´¦Àí¶à´Î£¬¿ÉÄÜ»áµ¼ÖÂactivationRefCountÎª¸ºÊı£¬ÕâÊ±»áµ¼ÖÂÖĞÎÄÊäÈë·¨ÊäÈë¹ÊÕÏ¡£
-			¹Ê·¢ËÍÒ»¸öActiveÏûÏ¢½øĞĞ½âËö£¬Ä¿µÄÊ¹ÏàÓ¦µÄ¼ÆÊıÆ÷ÖØÖÃÎª0¡£
-			*/
-			QEvent winActivate(QEvent::WindowActivate);
-			QApplication::sendEvent(gs, &winActivate);
-		}
-	}
-
-	return false;
-}
 
 void KWindow::setAutoDeleteWhenAppQuit( bool on )
 {

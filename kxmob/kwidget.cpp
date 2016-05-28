@@ -217,13 +217,13 @@ void KWidget::setBackgroundStyle( Qt::BrushStyle bs )
     updateBackgroundBrush();
 }
 
-KWidget::QtGradient KWidget::backgroundGradient() const
+QtGradient KWidget::backgroundGradient() const
 {
 	Q_D(const KWidget);
 	return QtGradient();
 }
 
-void KWidget::setBackgroundGradient( const KWidget::QtGradient& gd )
+void KWidget::setBackgroundGradient( const QtGradient& gd )
 {
 	Q_D(KWidget);
 	QBrush brush;
