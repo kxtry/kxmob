@@ -1,6 +1,5 @@
-#include "widget.h"
+﻿#include "widget.h"
 #include <QApplication>
-#include "kxmob.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,7 +7,6 @@ int main(int argc, char *argv[])
     Widget w;
     w.show();
 
-    KxMob::init();
 
     return a.exec();
 }

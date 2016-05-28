@@ -2,8 +2,8 @@
 #define _KXMOB_GLOBAL_H_
 
 /* Qt library */
-#include <QtGlobal>
-#include <QtCore>
+#include <QApplication>
+#include <QtCore/QtGlobal>
 #include <QObject>
 
 #include <QPoint>
@@ -39,13 +39,14 @@
 #include <QDate>
 #include <QTime>
 #include <QDebug>
+#include <QMetaEnum>
 
 
-#ifdef KXFW_LIB
-# define KXFW_API Q_DECL_EXPORT
-#else
-# define KXFW_API Q_DECL_IMPORT
-#endif
+//#ifdef KXFW_LIB
+//# define KXFW_API Q_DECL_EXPORT
+//#else
+//# define KXFW_API Q_DECL_IMPORT
+//#endif
 
 /* private */
 #include "kdatadef.h"

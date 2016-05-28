@@ -56,7 +56,7 @@ KWidget::~KWidget()
 {
     if(d_ptr->bRemovePostEvent)
     {
-        QCoreApplication::removePostedEvents(this);
+        QApplication::removePostedEvents(this);
     }
     delete d_ptr;
 }
@@ -211,52 +211,6 @@ void KWidget::setBackgroundStyle( Qt::BrushStyle bs )
     if(d->backgroundBrush.style() == bs)
         return;
     d->backgroundBrush.setStyle(bs);
-    updateBackgroundBrush();
-}
-
-QtGradient KWidget::backgroundGradient() const
-{
-    Q_D(const KWidget);
-    return QtGradient();
-}
-
-void KWidget::setBackgroundGradient( const QtGradient& gd )
-{
-    Q_D(KWidget);
-    QBrush brush;
-    switch(gd.t)
-    {
-    case QGradient::LinearGradient:
-        {
-            QLinearGradient lg(gd.d.l.startx, gd.d.l.starty, gd.d.l.finalx, gd.d.l.finaly);
-            lg.setCoordinateMode(QGradient::ObjectBoundingMode);
-            lg.setSpread(gd.spread);
-            lg.setStops(gd.gs);
-            brush = QBrush(lg);
-        }
-        break;
-    case QGradient::ConicalGradient:
-        {
-            QConicalGradient cg(gd.d.c.centerx, gd.d.c.centery,gd.d.c.angle);
-            cg.setCoordinateMode(QGradient::ObjectBoundingMode);
-            cg.setSpread(gd.spread);
-            cg.setStops(gd.gs);
-            brush = QBrush(cg);
-        }
-        break;
-    case QGradient::RadialGradient:
-        {
-            QRadialGradient rg(gd.d.r.centerx, gd.d.r.centery,gd.d.r.radius);
-            rg.setCoordinateMode(QGradient::ObjectBoundingMode);
-            rg.setSpread(gd.spread);
-            rg.setStops(gd.gs);
-            brush = QBrush(rg);
-        }
-        break;
-    }
-    if(d->backgroundBrush == brush)
-        return;
-    d->backgroundBrush = brush;
     updateBackgroundBrush();
 }
 
@@ -1148,6 +1102,7 @@ QString KWidget::skinName() const
 
 void KWidget::setSkinName( const QString& name )
 {
+    Q_UNUSED(name);
     //直接调用全局皮肤设置。
 //    KTheme::setSkinName(this, name);
 }

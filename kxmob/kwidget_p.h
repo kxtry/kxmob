@@ -5,7 +5,7 @@
 
 class KWidget;
 
-class KXFW_API KWidgetPrivate
+class KWidgetPrivate
 {
     Q_DECLARE_PUBLIC(KWidget)
 

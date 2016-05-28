@@ -11,8 +11,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = uishower
 TEMPLATE = app
 
+PRECOMPILED_HEADER = stable.h
 
 SOURCES += main.cpp\
         widget.cpp
 
-HEADERS  += widget.h
+HEADERS  += widget.h \
+    stable.h

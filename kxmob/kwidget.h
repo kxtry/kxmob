@@ -4,11 +4,12 @@
 #include <QGraphicsWidget>
 
 class QGraphicsLayout;
+class QGraphicsView;
 struct XMLNode;
 
 class KWidgetPrivate;
 
-class KXFW_API KWidget : public QGraphicsWidget
+class KWidget : public QGraphicsWidget
 {
 public:
     enum DragPolicy
@@ -110,14 +111,13 @@ public:
     Q_PROPERTY(qreal maximumHeight READ maximumHeight WRITE setMaximumHeight)
     Q_PROPERTY(QSizeF minimumSize READ minimumSize WRITE setMinimumSize)
     Q_PROPERTY(QSizeF maximumSize READ maximumSize WRITE setMaximumSize)
-    Q_PROPERTY(QCursor cursor READ cursor WRITE setCursor RESET unsetCursor)
     Q_PROPERTY(bool focus READ hasFocus)
     Q_PROPERTY(Qt::ContextMenuPolicy contextMenuPolicy READ contextMenuPolicy WRITE setContextMenuPolicy)
     Q_PROPERTY(bool acceptDrops READ acceptDrops WRITE setAcceptDrops)
     Q_PROPERTY(QString toolTip READ toolTip WRITE setToolTip)
     Q_PROPERTY(bool bylayout READ bylayout WRITE setByLayout)
     Q_PROPERTY(QColor backgroundColor READ backgroundColor WRITE setBackgroundColor)
-    Q_PROPERTY(QtGradient backgroundGradient READ backgroundGradient WRITE setBackgroundGradient)
+
     Q_PROPERTY(QBrush backgroundBrush READ backgroundBrush WRITE setBackgroundBrush)
     Q_PROPERTY(Qt::BrushStyle backgroundStyle READ backgroundStyle WRITE setBackgroundStyle)
     Q_PROPERTY(bool content READ hasContent WRITE enableContent)
@@ -189,8 +189,6 @@ public:
     Qt::BrushStyle backgroundStyle() const;
     void setBackgroundStyle(Qt::BrushStyle bs);
 
-    QtGradient backgroundGradient() const;
-    void setBackgroundGradient(const QtGradient& gd);
 
     void unsetBackgroundBrush();
 
