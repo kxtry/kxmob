@@ -111,7 +111,7 @@ bool KResource::loadXml(const QString& path, QDomDocument& xml)
             int errorColumn;
             if(!xml.setContent(&file, true, &errorStr, &errorLine, &errorColumn)){
                 file.close();
-                qDebug() << tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr);
+                qDebug() << QObject::tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr);
                 return false;
             }
             file.close();

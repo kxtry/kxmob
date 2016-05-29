@@ -44,6 +44,7 @@
 #include <QCoreApplication>
 #include <QApplication>
 
+#define KX_ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 inline void qDeleteLater(QObject *obj)
 {

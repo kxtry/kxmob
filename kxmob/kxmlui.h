@@ -93,9 +93,9 @@ public:
 	/*增加一个对像，可供信号连接或激发函数的参数输入。*/
 	void addObject(const QString& objName, QObject* obj);
 	/*信号量连接*/
-	void addReceiver(QObject* obj, const QString& sender, const QByteArray& signal, const QByteArray& slot, Qt::ConnectionType itype);
+    void addReceiver(QObject* obj, const QString& sender, const QString& signal, const QString& slot, Qt::ConnectionType itype);
 	/*方法：激发信号或激发Invoke函数或事件槽函数*/
-	void addMethod(QObject *obj, const QByteArray& invoke, const QByteArray& argv, Qt::ConnectionType itype);
+    void addMethod(QObject *obj, const QString& invoke, const QString& argv, Qt::ConnectionType itype);
 	void execute();
 	void clearAll();
 private:
@@ -104,16 +104,16 @@ private:
 	{
 		QObject		*obj;
 		QString		sender;
-		QByteArray		signal;
-		QByteArray		slot;
+        QString		signal;
+        QString		slot;
 		Qt::ConnectionType	itype;
 	};
 	QList<EventReceiver> m_lstRecv;
 	struct MethodInvoker
 	{
 		QObject					*obj;
-		QByteArray				invoke;
-		QByteArray				argv;
+        QString                 invoke;
+        QString                 argv;
 		Qt::ConnectionType		itype;
 	};
 	QList<MethodInvoker> m_lstMethod;
@@ -137,32 +137,32 @@ public:
 	static void setSkin(QObject *objItem, const QString& skin);
 private:
 	//构造出皮肤池。
-	static QMetaObject *getMetaObject(const char* className);
-    static bool createSkinPool(QDomElement& xml);
-    static bool createUITreeFromXml(QDomElement& xml, KWidget *parent);
-    static KWindow* createUITreeFromXml(QDomElement& xml, QWidget *parent);
-    static void createElements(KWidget *item, QDomElement& node);
-    static bool createChild(QDomElement& child, KWidget *parent);
-    static void setProperties(QDomElement& child, QObject* item);
-	static QVariant setProperty(QObject *objItem, const char* attrName, const char* attrValue);
+    static QMetaObject *getMetaObject(const QString& className);
+    static bool createSkinPool(QDomElement xml);
+    static bool createUITreeFromXml(QDomElement xml, KWidget *parent);
+    static KWindow* createUITreeFromXml(QDomElement xml, QWidget *parent);
+    static void createElements(KWidget *item, QDomElement node);
+    static bool createChild(QDomElement child, KWidget *parent);
+    static void setProperties(QDomElement child, QObject* item);
+    static QVariant setProperty(QObject *objItem, const QString& attrName, const QString& attrValue);
     static KWindow *createWindow(const QString& className, QWidget *parent);
     static KWidget *createWidget(const QString& className, KWidget *parent);
     static bool setDefaultDataProperty(QObject *widget, QDomElement child);
 	/*设置事件*/
-    static void connectSlot(QObject *obj, QDomElement& node);
+    static void connectSlot(QObject *obj, QDomElement node);
 	/*激发函数*/
-    static void invokeMethod(QObject *obj, QDomElement& node);
+    static void invokeMethod(QObject *obj, QDomElement node);
 	/*设置数据*/
-    static void setData(KWidget *obj, QDomElement& node);
-    static bool buildTreeData(QList<QVariant>& list, QDomElement& node);
+    static void setData(KWidget *obj, QDomElement node);
+    static void buildTreeData(QList<QVariant>& list, QDomElement node);
 
     //uihelper
-    static bool executeUIHelperFromXml(QDomElement& xml, QObject *parent);
-    static bool executeHelper(QDomElement& child, QObject *parent, QObject *root);
+    static void executeUIHelperFromXml(QDomElement xml, QObject *parent);
+    static bool executeHelper(QDomElement child, QObject *parent, QObject *root);
     static KHelper *createHelper(const QString& className, QObject *parent);
 
 	/*skin*/
-    static bool initSkin(QDomElement& root);
+    static bool initSkin(QDomElement root);
 };
 
 #endif

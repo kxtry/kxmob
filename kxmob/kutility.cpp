@@ -2,6 +2,8 @@
 #include "kutility.h"
 #include "kwidget.h"
 
+#include <QTileRules>
+#include <QMovie>
 
 struct UtilsData
 {
@@ -130,27 +132,14 @@ bool KUtility::widgetInScreen( QWidget *widget )
 {
 	if(widget == NULL)
 		return false;
-	QRect frame = widget->frameGeometry();
-	if (!widget->isWindow())
-		frame.moveTopLeft(widget->mapToGlobal(QPoint(0,0)));
-	QDesktopWidget *desktop = QApplication::desktop();
-	int count = desktop->screenCount();
 
-	for(int i = 0; i < count; i++)
-	{
-		QRect screenRt = desktop->screenGeometry(i);
-		if(screenRt.intersects(frame))
-			return true;
-	}
 	return false;
 }
 
 QRect KUtility::desktopWorkArea()
 {
-	RECT r;
-//	SystemParametersInfo(SPI_GETWORKAREA, 0, &r, 0);
-	QRect qr = QRect(QPoint(r.left, r.top), QPoint(r.right - 1, r.bottom - 1));
-	return qr;
+
+    return QRect();
 }
 
 QSize KUtility::virtualScreenSize()
@@ -458,34 +447,6 @@ void KUtility::CopyVS2008ManifestFiles(const QString& dstPath)
 			QFile::copy(srcDir.absoluteFilePath(list[i]), dstDir.absoluteFilePath(list[i]));
 		}
 	}
-}
-
-void KUtility::addPathToEnvironment( const QString& path )
-{
-	const int bufLength = 32767+1;
-	char* oldPathBuffer = new char[bufLength];
-	::GetEnvironmentVariableA("path",oldPathBuffer,bufLength);
-	QString szEnvPath(oldPathBuffer);
-	QStringList lstEvn = szEnvPath.split(';');
-	if(!lstEvn.contains(path, Qt::CaseInsensitive))
-	{
-		QString dir = szEnvPath + ";" + path;
-		std::wstring pathEnvWstr = dir.toStdWString();
-		::SetEnvironmentVariable(L"path", pathEnvWstr.c_str());
-		qputenv("path", dir.toStdString().c_str());
-	}
-}
-
-void KUtility::addVS2008ManifestFilesToEnvironment()
-{
-	QString srcDir = QApplication::applicationDirPath() + "/" + VS2008_MANIFEST_DIR_NAME;
-	addPathToEnvironment(srcDir);
-}
-
-void KUtility::addParameterToEnvironment( const QString& name, const QString& val )
-{
-	::SetEnvironmentVariable(name.toStdWString().c_str(), val.toStdWString().c_str());
-	qputenv(name.toStdString().c_str(), val.toStdString().c_str());
 }
 
 void KUtility::drawOneTopLeft( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )

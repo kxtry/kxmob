@@ -1,5 +1,6 @@
 ﻿#include "stable.h"
 #include "kxmlui.h"
+#include "khelper.h"
 #include "kresource.h"
 #include "kwidget.h"
 #include "kwindow.h"
@@ -35,8 +36,8 @@ typedef QHash<QString, KWindowCreatorBase*> KWindowHash;
 struct SkinData
 {
 	QMetaObject *metaobj;//安全检查
-	QMap<QByteArray,QVariant> skinvar;//当skinvar有值时，代表所有skinraw已经转换成skinvar了。
-	QMap<QByteArray,QByteArray> skinraw;//刚开始时，由于类型无法及时转换成QVariant估直接保存了XML中值。
+    QMap<QString,QVariant> skinvar;//当skinvar有值时，代表所有skinraw已经转换成skinvar了。
+    QMap<QString,QString> skinraw;//刚开始时，由于类型无法及时转换成QVariant估直接保存了XML中值。
 };
 
 typedef QHash<QString,SkinData> KSkinHash;
@@ -530,28 +531,26 @@ QVariant setDefaultValue( const QString &value )
 }
 
 //arguments="(int)3,(int)3"
-void argumentsFromText( QList<QByteArray>& argvs, QList<int>& lstType, QList<QVariant>& lstVars, QList<QGenericArgument> &lstArgv )
+void argumentsFromText( QList<QString>& argvs, QList<int>& lstType, QList<QVariant>& lstVars, QList<QGenericArgument> &lstArgv )
 {
 	int count = 0;
 	for(int i = 0; i < argvs.count(); i++, count++)
 	{
-		QByteArray& item = argvs[i];
+        QString item = argvs[i];
 		if(item.isEmpty())
 		{
 			break;
 		}
 		int left = item.lastIndexOf('(');
-		Q_ASSERT_X(left >= 0, __FUNCTION__, "can't find the left bracket");
-		item[left] = '\0';
-		char *typeName = item.data();
+        Q_ASSERT_X(left >= 0, __FUNCTION__, "can't find the left bracket");
+        QString typeName = item.left(left);
 		int right = item.lastIndexOf(')');
-		Q_ASSERT_X(right >= 0, __FUNCTION__, "can't find the right bracket");
-		item[right] = '\0';
-		char *argvTxt = typeName + left + 1;
-		int type_id = QVariant::nameToType(typeName);
+        Q_ASSERT_X(right >= 0, __FUNCTION__, "can't find the right bracket");
+        QString argvTxt = item.mid(left+1, right-left-1);
+        int type_id = QVariant::nameToType(typeName.toLatin1().data());
 		if(type_id == QVariant::UserType)
 		{
-			type_id = QMetaType::type(typeName);
+            type_id = QMetaType::type(typeName.toLatin1().data());
 		}
 		lstType.push_back(type_id);
 		PFUNObjectPropertyCreator creator = propertyHash()->value(type_id);
@@ -587,7 +586,7 @@ KX_PROPERTY_CONVERTOR_GLOBAL_STATIC(QtGradient, stringToQtGradient);
 
 
 
-/*                     KXmlUI                                        */
+/* KXmlUI */
 
 bool KXmlUI::widgetFromFile( const QString& file, KWidget *parent )
 {
@@ -667,7 +666,7 @@ KWindow* KXmlUI::windowFromMemory( const QByteArray& memory, QWidget *parent /*=
 	return window;
 }
 
-bool KXmlUI::createUITreeFromXml( QDomElement& node, KWidget *parent )
+bool KXmlUI::createUITreeFromXml( QDomElement node, KWidget *parent )
 {
     QDomElement uitree = node.firstChildElement("uitree");
 
@@ -677,17 +676,15 @@ bool KXmlUI::createUITreeFromXml( QDomElement& node, KWidget *parent )
 		return false;
 	}
 
-    QDomElement child = uitree.firstChildElement();
-    while(!child.isNull())
+    for(QDomElement n = uitree.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
     {
-        createChild(child, parent);
-        child = child.nextSiblingElement();
+        createChild(n, parent);
     }
 
 	return true;
 }
 
-KWindow* KXmlUI::createUITreeFromXml( QDomElement& node, QWidget *parent )
+KWindow* KXmlUI::createUITreeFromXml( QDomElement node, QWidget *parent )
 {
     QDomElement uitree = node.firstChildElement("uitree");
 
@@ -705,65 +702,61 @@ KWindow* KXmlUI::createUITreeFromXml( QDomElement& node, QWidget *parent )
 		return NULL;
 	setProperties(topNode, window);
 	KWidget *rootWidget = window->rootWidget();
-	count = topNode.nChildNode();
-	for (int index = 0; index < count; ++index)
-	{
-		createChild(topNode.getChildNode(index), rootWidget);
-	}
+    for(QDomElement n = topNode.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
+    {
+        createChild(n, rootWidget);
+    }
+
 	window->construct();
 	return window;
 }
 
-bool KXmlUI::createChild( QDomElement& child, KWidget *parent )
+bool KXmlUI::createChild( QDomElement child, KWidget *parent )
 {
-	const char *className = child.getName();
+    QString className = child.tagName();
 	KWidget *widget = createWidget(className, parent);
 	if(widget == NULL)
 		return false;
 	parent->addItem(widget);
-	setProperties(child, widget);
-	int count = child.nChildNode();
-	KWidget *pWidget = widget->layoutWidget();
-	for (int index = 0; index < count; ++index)
-	{
-		createElements(pWidget, child.getChildNode(index));
-	}
-	widget->construct();
-	return true;
+    setProperties(child, widget);
+
+    KWidget *pWidget = widget->layoutWidget();
+    for(QDomElement n = child.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
+    {
+        createElements(pWidget, n);
+    }
+    widget->construct();
+    return true;
 }
 
-void KXmlUI::setProperties( QDomElement& child, QObject* item )
+void KXmlUI::setProperties( QDomElement child, QObject* item )
 {
-	QMap<QByteArray, QObject*> itemMap;
-	int count = child.nAttribute();
-	for (int index = 0; index < count; ++index)
+    QMap<QString, QObject*> itemMap;
+
+    QDomNamedNodeMap attrs = child.attributes();
+    for (int index = 0; index < attrs.count(); ++index)
 	{
-		QByteArray attrName(child.getAttributeName(index));
-		if (attrName.isEmpty())
-		{
-			Q_ASSERT_X(false, __FUNCTION__, "attr name is null");
-			continue;
-		}
-		const char *attrValue = child.getAttributeValue(index);
-		int dotIndex = attrName.lastIndexOf('.');
+        QDomAttr attr = attrs.item(index).toAttr();
+        QString name = attr.name();
+        QString val = attr.value();
+        int dotIndex = name.lastIndexOf('.');
 		if(dotIndex == -1)
 		{
-			setProperty(item, attrName, attrValue);
+            setProperty(item, name, val);
 		}
 		else
 		{
 			/*查找出内置对象*/
-			QList<QByteArray> extAtrs = attrName.split('.');
-			attrName[dotIndex] = '\0';
-			char *objName = attrName.data();
-			char *objAttr = objName + dotIndex + 1;
+            QList<QString> extAtrs = name.split('.');
+            QString objName = name.left(dotIndex);
+            QString objAttr = name.mid(dotIndex+1);
 			QObject *objExt = itemMap.value(objName);
 			if(objExt == NULL)
 			{
 				QObject *itemOwner = item;
 				for(int i = 0; i < extAtrs.count() - 1; i++)
 				{
-					QVariant varExt = itemOwner->property(extAtrs[i].data());
+                    QVariant varExt = itemOwner->property(extAtrs[i].toLatin1().data());
 					objExt = varExt.value<QObject*>();
 					Q_ASSERT_X(objExt, __FUNCTION__, QString("no such property:%1.%2").arg(objName).arg(objAttr).toStdString().c_str());
 					if(objExt == NULL)
@@ -773,31 +766,31 @@ void KXmlUI::setProperties( QDomElement& child, QObject* item )
 			}
 			if(objExt == NULL)
 				continue;
-			setProperty(objExt, objAttr, attrValue);
+            setProperty(objExt, objAttr, val);
 			itemMap[objName] = objExt;
 		}
 	}
 }
 
-QVariant KXmlUI::setProperty( QObject *item, const char* attrName, const char* attrValue )
+QVariant KXmlUI::setProperty( QObject *item, const QString& attrName, const QString& attrValue )
 {
 	if(item == NULL)
 		return QVariant();
 	QString objName = item->objectName();
-	int idx = item->metaObject()->indexOfProperty(attrName);
+    int idx = item->metaObject()->indexOfProperty(attrName.toLatin1().data());
 	if(idx == -1)
 	{
-		if(strcmp(attrName, OBJECT_ARGUMENT_PROPERTY) == 0)
+        if(attrName.compare(OBJECT_ARGUMENT_PROPERTY) == 0)
 		{
 			methodInvoker()->addObject(objName, item);
 			return QVariant();
 		}
 		//当作附加属性记录下来。
 		QVariant val(attrValue);
-		item->setProperty(attrName, val);
+        item->setProperty(attrName.toLatin1().data(), val);
 		return val;
 	}
-	Q_ASSERT_X(strcmp(attrName, OBJECT_ARGUMENT_PROPERTY), __FUNCTION__, QString("%1 has the same attribute named of %2").arg(objName).arg(attrName).toStdString().c_str());
+    Q_ASSERT_X(attrName.compare(OBJECT_ARGUMENT_PROPERTY), __FUNCTION__, QString("%1 has the same attribute named of %2").arg(objName).arg(attrName).toStdString().c_str());
 	QMetaProperty prop = item->metaObject()->property(idx);
 	int type_id = prop.type();
 	if(type_id == QVariant::UserType)
@@ -811,50 +804,49 @@ QVariant KXmlUI::setProperty( QObject *item, const char* attrName, const char* a
 	}
 
 	QVariant val = creator(attrValue);
-	bool b = item->setProperty(attrName, val);
+    bool b = item->setProperty(attrName.toLatin1().data(), val);
 	Q_ASSERT_X(b, __FUNCTION__, QString("setProperty %1 failed for bad value. orginal string:%2").arg(attrName).arg(attrValue).toStdString().c_str());
 	return val;
 }
 
-KWindow * KXmlUI::createWindow( const char* className, QWidget *parent )
+KWindow * KXmlUI::createWindow( const QString& className, QWidget *parent )
 {
-	KWindowHash::iterator iter = windowHash()->find(QLatin1String(className));
+    KWindowHash::iterator iter = windowHash()->find(className);
 	if(iter == windowHash()->end())
 		return NULL;
 	KWindowCreatorBase *windowCreator = iter.value();
 	return windowCreator->create(parent);
 }
 
-KWidget * KXmlUI::createWidget( const char *className, KWidget *parent )
+KWidget * KXmlUI::createWidget( const QString& className, KWidget *parent )
 {
-	KWidgetHash::iterator iter = widgetHash()->find(QLatin1String(className));
+    KWidgetHash::iterator iter = widgetHash()->find(className);
 	if(iter == widgetHash()->end())
 		return NULL;
 	KWidgetCreatorBase *widgetCreator = iter.value();
 	return widgetCreator->create(parent);
 }
 
-bool KXmlUI::setDefaultDataProperty( QObject *widget, XMLNode child )
+bool KXmlUI::setDefaultDataProperty( QObject *widget, QDomElement child )
 {
-	int count = child.nChildNode();
-	QList<QVariant> mapList;
-	for (int i = 0; i < count; ++i)
-	{
-		int attrCount = child.getChildNode(i).nAttribute();
-		QMap<QString, QVariant> m;
-		const XMLNode elem = child.getChildNode(i);
-		for (int j = 0; j < attrCount; j++)
-		{
-			m.insert(elem.getAttributeName(j), elem.getAttributeValue(j));
-		}
-		mapList.push_back(m);
-	}
+    QList<QVariant> mapList;
+    for(QDomElement n = child.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
+    {
+        QMap<QString, QVariant> m;
+        QDomNamedNodeMap attrs = n.attributes();
+        for (int i = 0; i < attrs.count(); i++)
+        {
+            QDomAttr attr = attrs.item(i).toAttr();
+            m.insert(attr.name(), attr.value());
+        }
+        mapList.push_back(m);
+    }
 	return widget->setProperty("data", mapList);
 }
 
-void KXmlUI::createElements( KWidget *item, QDomElement& node )
+void KXmlUI::createElements( KWidget *item, QDomElement node )
 {
-	QByteArray tagName(node.getName());
+    QString tagName = node.tagName();
 	int index = tagName.indexOf(':');
 	if(index == -1)
 	{
@@ -862,46 +854,44 @@ void KXmlUI::createElements( KWidget *item, QDomElement& node )
 	}
 	else
 	{
-		const char *szType = tagName.data() + index + 1;
-		Q_ASSERT_X(szType[0] != ':', __FUNCTION__, QString("it's : not ::[%1]").arg(tagName.data()).toStdString().c_str());
-		if(strcmp(szType, "data") == 0)
+        QString szType = tagName.mid(index+1);
+        if(szType.compare("data") == 0)
 		{
 			setData(item, node);
 		}
-		else if(strcmp(szType, "event") == 0)
+        else if(szType.compare("event") == 0)
 		{
 			connectSlot(item, node);
 		}
-		else if(strcmp(szType, "invoke") == 0)
+        else if(szType.compare("invoke") == 0)
 		{
 			invokeMethod(item, node);
 		}
-	}
-	
+	}	
 }
 
-void KXmlUI::connectSlot( QObject *obj, QDomElement& node )
+void KXmlUI::connectSlot( QObject *obj, QDomElement node )
 {
-	QString sender(node.getAttribute(EVENT_OBJECT_PROPERTY));
+    QString sender(node.attribute(EVENT_OBJECT_PROPERTY));
 	QByteArray signal("2");
 	QByteArray slot("1");
 	Qt::ConnectionType connType = Qt::AutoConnection;
-	signal.append(node.getAttribute(EVENT_SIGNAL_PROPERTY));
-	slot.append(node.getAttribute(EVENT_SLOT_PROPERTY));
-	const char* attrValue = node.getAttribute(EVENT_CONNECT_PROPERTY);
-	if(attrValue == NULL)
+    signal.append(node.attribute(EVENT_SIGNAL_PROPERTY));
+    slot.append(node.attribute(EVENT_SLOT_PROPERTY));
+    QString attrValue = node.attribute(EVENT_CONNECT_PROPERTY);
+    if(attrValue.isEmpty())
 	{
 		connType = Qt::AutoConnection;
 	}
-	if(strcmp(attrValue, "auto") == 0)
+    if(attrValue.compare("auto") == 0)
 	{
 		connType = Qt::AutoConnection;
 	}
-	else if(strcmp(attrValue, "direct") == 0)
+    else if(attrValue.compare("direct") == 0)
 	{
 		connType = Qt::DirectConnection;
 	}
-	else if(strcmp(attrValue, "queue") == 0)
+    else if(attrValue.compare("queue") == 0)
 	{
 		connType = Qt::QueuedConnection;
 	}
@@ -912,27 +902,25 @@ void KXmlUI::connectSlot( QObject *obj, QDomElement& node )
 	methodInvoker()->addReceiver(obj, sender, signal, slot, connType);
 }
 
-void KXmlUI::invokeMethod( QObject *obj, QDomElement& node )
+void KXmlUI::invokeMethod( QObject *obj, QDomElement node )
 {
-	QByteArray invoke;
-	QByteArray argv;
 	Qt::ConnectionType connType = Qt::AutoConnection;
-	invoke.append(node.getAttribute(INVOKE_FUNCTION_PROPERTY));
-	argv.append(node.getAttribute(INVOKE_ARGUMENT_PROPERTY));
-	const char* connValue = node.getAttribute(INVOKE_CONNECT_PROPERTY);
-	if(connValue == NULL)
+    QString invoke = node.attribute(INVOKE_FUNCTION_PROPERTY);
+    QString argv = node.attribute(INVOKE_ARGUMENT_PROPERTY);
+    QString connValue = node.attribute(INVOKE_CONNECT_PROPERTY);
+    if(connValue.isEmpty())
 	{
 		connType = Qt::AutoConnection;
 	}
-	else if(strcmp(connValue, "auto") == 0)
+    else if(connValue.compare("auto") == 0)
 	{
 		connType = Qt::AutoConnection;
 	}
-	else if(strcmp(connValue, "direct") == 0)
+    else if(connValue.compare("direct") == 0)
 	{
 		connType = Qt::DirectConnection;
 	}
-	else if(strcmp(connValue, "queue") == 0)
+    else if(connValue.compare("queue") == 0)
 	{
 		connType = Qt::QueuedConnection;
 	}
@@ -943,29 +931,29 @@ void KXmlUI::invokeMethod( QObject *obj, QDomElement& node )
 	methodInvoker()->addMethod(obj, invoke, argv, connType);
 }
 
-void KXmlUI::setData( KWidget *obj, QDomElement& node )
+void KXmlUI::setData( KWidget *obj, QDomElement node )
 {
-	const char *invoke = node.getAttribute(DATA_FUNCTION_PROPERTY);
-	const char *model = node.getAttribute(DATA_MODEL_PROPERTY);
+    QString invoke = node.attribute(DATA_FUNCTION_PROPERTY);
+    QString model = node.attribute(DATA_MODEL_PROPERTY);
 	Qt::ConnectionType connType = Qt::AutoConnection;
-	const char* connValue = node.getAttribute(DATA_CONNECT_PROPERTY);
-	if(invoke == NULL)
+    QString connValue = node.attribute(DATA_CONNECT_PROPERTY);
+    if(invoke.isEmpty())
 	{
 		invoke = "setData";
 	}
-	if(connValue == NULL)
+    if(connValue.isEmpty())
 	{
 		connType = Qt::AutoConnection;
 	}
-	else if(strcmp(connValue, "auto") == 0)
+    else if(connValue.compare("auto") == 0)
 	{
 		connType = Qt::AutoConnection;
 	}
-	else if(strcmp(connValue, "direct") == 0)
+    else if(connValue.compare("direct") == 0)
 	{
 		connType = Qt::DirectConnection;
 	}
-	else if(strcmp(connValue, "queue") == 0)
+    else if(connValue.compare("queue") == 0)
 	{
 		connType = Qt::QueuedConnection;
 	}
@@ -973,71 +961,54 @@ void KXmlUI::setData( KWidget *obj, QDomElement& node )
 	{
 		connType = Qt::AutoConnection;
 	}
-	if(model == NULL || strcmp(model, "xml") == 0)
+    if(model.isEmpty() || model.compare("xml") == 0)
 	{
-		QMetaObject::invokeMethod(obj, invoke, connType, Q_ARG(const XMLNode*, &node));
+//        QMetaObject::invokeMethod(obj, invoke, connType, Q_ARG(QDomElement, node));
 	}
-	else if(strcmp(model, "variant") == 0)
+    else if(model.compare("variant") == 0)
 	{
-		Q_ASSERT_X(node.nChildNode(), __FUNCTION__, "it failed to set data for bad child");
-		XMLNode &dataNode = node.getChildNode(0);
-		const char *dataType = dataNode.getName();
 		QList<QVariant> tree;
 		buildTreeData(tree, node);
-		QMetaObject::invokeMethod(obj, invoke, connType, Q_ARG(QVariant, QVariant(tree)));
+        QMetaObject::invokeMethod(obj, invoke.toLatin1().data(), connType, Q_ARG(QVariant, QVariant(tree)));
 	}
 }
 
-bool KXmlUI::buildTreeData( QList<QVariant>& list, QDomElement& node )
+void KXmlUI::buildTreeData( QList<QVariant>& list, QDomElement node )
 {
-	int count = node.nChildNode();
-	if (count == 0)
-	{
-		return false;
-	}
-
-	for (int i = 0; i < count; ++i)
-	{
-		XMLNode &child = node.getChildNode(i);
-		int attrCount = child.nAttribute();
-		QMap<QString, QVariant> tag;
-		QMap<QString, QVariant> m;
-		for (int j = 0; j < attrCount; j++)
-		{
-			m.insert(child.getAttributeName(j), child.getAttributeValue(j));
-		}
-		tag.insert(child.getName(), m);
-		QList<QVariant> childList;
-		if (buildTreeData(childList, child))
-		{
-			m.insert("children", childList);
-		}
-
-		list.append(tag);
-	}
-	return true;
-}
-
-bool KXmlUI::executeUIHelperFromXml( QDomElement& xml, QObject *parent )
-{
-    XMLNode child = xml.getChildNodeByPath("uihelper");
-
-    if (child.isEmpty())
+    for(QDomElement n = node.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
     {
-        return false;
+        QMap<QString, QVariant> tag;
+        QMap<QString, QVariant> m;
+        QDomNamedNodeMap attrs = n.attributes();
+        for (int i = 0; i < attrs.count(); i++)
+        {
+            QDomAttr attr = attrs.item(i).toAttr();
+            m.insert(attr.name(), attr.value());
+        }
+        tag.insert(n.tagName(), m);
+        QList<QVariant> childList;
+        buildTreeData(childList, n);
+        if(childList.count() > 0)
+        {
+            m.insert("children", childList);
+        }
+        list.append(tag);
     }
-
-    int count = child.nChildNode();
-    for (int index = 0; index < count; ++index)
-    {
-        executeHelper(child.getChildNode(index), parent, parent);
-    }
-    return true;
 }
 
-bool KXmlUI::executeHelper( QDomElement& child, QObject *parent, QObject *root )
+void KXmlUI::executeUIHelperFromXml( QDomElement xml, QObject *parent )
 {
-    const char *className = child.getName();
+    QDomElement child = xml.firstChildElement("uihelper");
+
+    for(QDomElement n = child.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
+    {
+        executeHelper(n, parent, parent);
+    }
+}
+
+bool KXmlUI::executeHelper( QDomElement child, QObject *parent, QObject *root )
+{
+    QString className = child.tagName();
     KHelper *helper = createHelper(className, parent);
     if(helper == NULL)
         return false;
@@ -1045,20 +1016,18 @@ bool KXmlUI::executeHelper( QDomElement& child, QObject *parent, QObject *root )
     helper->setRootObject(root);
     if(helper->execute())
     {
-        int count = child.nChildNode();
-        for (int index = 0; index < count; ++index)
+        for(QDomElement n = child.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
         {
-            executeHelper(child.getChildNode(index), helper, helper->targetObject());
+            executeHelper(n, helper, helper->targetObject());
         }
     }
-
     delete helper;
     return true;
 }
 
-KHelper* KXmlUI::createHelper( const char *className, QObject *parent )
+KHelper* KXmlUI::createHelper( const QString& className, QObject *parent )
 {
-    KHelperHash::iterator iter = helperHash()->find(QLatin1String(className));
+    KHelperHash::iterator iter = helperHash()->find(className);
     if(iter == helperHash()->end())
         return NULL;
     KHelperCreatorBase *helperCreator = iter.value();
@@ -1073,35 +1042,38 @@ KHelper* KXmlUI::createHelper( const char *className, QObject *parent )
 虽然通过该方法使内存增大了，但把公共相同的东西，放到同一处查询，使得XML文件更小，最终效率也提升了。维护也变得更容易。
 */
 
-bool KXmlUI::initSkin( const char* file )
+bool KXmlUI::initSkin( const QString& file )
 {
-	XMLNode xml;
+    QDomDocument xml;
 	if (!KResource::loadXml(file, xml))
 	{
 		Q_ASSERT_X(false, __FUNCTION__, "xml file error!");
 		return false;
 	}
-
-	return initSkin(xml);
+    QDomElement root = xml.firstChildElement();
+    return initSkin(root);
 }
 
 bool KXmlUI::initSkin( const QByteArray& memory )
 {
-	XMLNode xml;
-	XMLResults err;
+    QString errorStr;
+    int errorLine;
+    int errorColumn;
+    QDomDocument xml;
+    if(!xml.setContent(memory, true, &errorStr, &errorLine, &errorColumn)){
+        qDebug() << QObject::tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr);
+        return false;
+    }
 
-	xml = XMLNode::parseString(memory.data(), NULL, &err);
-	if(err.error == eXMLErrorNone)
-		return false;
-
-	return initSkin(xml);
+    QDomElement root = xml.firstChildElement();
+    return initSkin(root);
 }
 
-bool KXmlUI::initSkin( QDomElement& root )
+bool KXmlUI::initSkin( QDomElement root )
 {
-	XMLNode object = root.getChildNodeByPath("uiskin");
+    QDomElement object = root.firstChildElement("uiskin");
 
-	if (object.isEmpty())
+    if (object.isNull())
 	{
 		Q_ASSERT_X(false, __FUNCTION__, "has no skin object.");
 		return false;
@@ -1128,12 +1100,12 @@ void KXmlUI::setSkin( QObject *obj, const QString& name )
 		}
 	}
 	//说明是该类或派生。
-	QMap<QByteArray, QObject*> itemMap;
+    QMap<QString, QObject*> itemMap;
 	if(!sd.skinvar.isEmpty())
 	{
-		for(QMap<QByteArray,QVariant>::Iterator iter = sd.skinvar.begin(); iter != sd.skinvar.end(); iter++)
+        for(QMap<QString,QVariant>::Iterator iter = sd.skinvar.begin(); iter != sd.skinvar.end(); iter++)
 		{
-			QByteArray attrName = iter.key();
+            QString attrName = iter.key();
 			if(attrName.isEmpty())
 			{
 				Q_ASSERT_X(false, __FUNCTION__, "attr name is null");
@@ -1143,22 +1115,21 @@ void KXmlUI::setSkin( QObject *obj, const QString& name )
 			int dotIndex = attrName.lastIndexOf('.');
 			if(dotIndex == -1)
 			{
-				obj->setProperty(attrName, attrValue);
+                obj->setProperty(attrName.toLatin1().data(), attrValue);
 			}
 			else
 			{
 				/*查找出内置对象*/
-				QList<QByteArray> extAtrs = attrName.split('.');
-				attrName[dotIndex] = '\0';
-				char *objName = attrName.data();
-				char *objAttr = objName + dotIndex + 1;
+                QList<QString> extAtrs = attrName.split('.');
+                QString objName = attrName.left(dotIndex);
+                QString objAttr = attrName.mid(dotIndex+1);
 				QObject *objExt = itemMap.value(objName);
 				if(objExt == NULL)
 				{
 					QObject *itemOwner = obj;
 					for(int i = 0; i < extAtrs.count() - 1; i++)
 					{
-						QVariant varExt = itemOwner->property(extAtrs[i].data());
+                        QVariant varExt = itemOwner->property(extAtrs[i].toLatin1().data());
 						objExt = varExt.value<QObject*>();
 						Q_ASSERT_X(objExt, __FUNCTION__, QString("bad property:%1.%2").arg(objName).arg(objAttr).toStdString().c_str());
 						if(objExt == NULL)
@@ -1168,27 +1139,27 @@ void KXmlUI::setSkin( QObject *obj, const QString& name )
 				}
 				if(objExt == NULL)
 					continue;
-				bool b = objExt->setProperty(objAttr, attrValue);
+                bool b = objExt->setProperty(objAttr.toLatin1().data(), attrValue);
 				itemMap[objName] = objExt;
 			}
 		}
 	}
 	else
 	{
-		for(QMap<QByteArray,QByteArray>::Iterator iter = sd.skinraw.begin(); iter != sd.skinraw.end(); iter++)
+        for(QMap<QString,QString>::Iterator iter = sd.skinraw.begin(); iter != sd.skinraw.end(); iter++)
 		{
-			QByteArray attrName = iter.key();
-			QByteArray attrNameOrg = attrName;
+            QString attrName = iter.key();
+            QString attrNameOrg = attrName;
 			if(attrName.isEmpty())
 			{
 				Q_ASSERT_X(false, __FUNCTION__, "attr name is null");
 				continue;
 			}
-			QByteArray attrValue = iter.value();
+            QString attrValue = iter.value();
 			int dotIndex = attrName.lastIndexOf('.');
 			if(dotIndex == -1)
 			{
-				QVariant val = setProperty(obj, attrName, attrValue.data());
+                QVariant val = setProperty(obj, attrName, attrValue);
 				if(val.isValid())
 				{
 					sd.skinvar.insert(attrNameOrg, val);
@@ -1197,17 +1168,16 @@ void KXmlUI::setSkin( QObject *obj, const QString& name )
 			else
 			{
 				/*查找出内置对象*/
-				QList<QByteArray> extAtrs = attrName.split('.');
-				attrName[dotIndex] = '\0';
-				char *objName = attrName.data();
-				char *objAttr = objName + dotIndex + 1;
+                QList<QString> extAtrs = attrName.split('.');
+                QString objName = attrName.left(dotIndex);
+                QString objAttr = attrName.mid(dotIndex+1);
 				QObject *objExt = itemMap.value(objName);
 				if(objExt == NULL)
 				{
 					QObject *itemOwner = obj;
 					for(int i = 0; i < extAtrs.count() - 1; i++)
 					{
-						QVariant varExt = itemOwner->property(extAtrs[i].data());
+                        QVariant varExt = itemOwner->property(extAtrs[i].toLatin1().data());
 						objExt = varExt.value<QObject*>();
 						Q_ASSERT_X(objExt, __FUNCTION__, QString("bad property:%1.%2").arg(objName).arg(objAttr).toStdString().c_str());
 						if(objExt == NULL)
@@ -1217,7 +1187,7 @@ void KXmlUI::setSkin( QObject *obj, const QString& name )
 				}
 				if(objExt == NULL)
 					continue;
-				QVariant val = setProperty(objExt, objAttr, attrValue.data());
+                QVariant val = setProperty(objExt, objAttr, attrValue);
 				if(val.isValid())
 				{
 					sd.skinvar.insert(attrNameOrg, val);
@@ -1229,32 +1199,26 @@ void KXmlUI::setSkin( QObject *obj, const QString& name )
 	}
 }
 
-bool KXmlUI::createSkinPool( QDomElement& xml )
+bool KXmlUI::createSkinPool( QDomElement xml )
 {
 	KSkinHash *skin = skinHash();
 
-	int count = xml.nChildNode();
-	for (int index = 0; index < count; index++)
-	{
-		XMLNode node = xml.getChildNode(index);
-		int attrCount = node.nAttribute();
-		const char *className = node.getName();
+    for (QDomElement n = xml.firstChildElement(); !n.isNull(); n = n.nextSiblingElement())
+    {
+        QString className = n.tagName();
 		QMetaObject *metaobj = getMetaObject(className);
 		if(metaobj == NULL)
 			continue;
 		SkinData sd;
 		sd.metaobj = metaobj;
 		QString skinName;
-		for (int iattr = 0; iattr < attrCount; iattr++)
+        QDomNamedNodeMap attrs = n.attributes();
+        for (int i = 0; i < attrs.count(); i++)
 		{
-			QByteArray attrName(node.getAttributeName(iattr));
-			if (attrName.isEmpty())
-			{
-				Q_ASSERT_X(false, __FUNCTION__, "attr name is null");
-				continue;
-			}
-			const char *attrValue = node.getAttributeValue(iattr);
-			if(attrName == "name")
+            QDomAttr attr = attrs.item(i).toAttr();
+            QString attrName = attr.name();
+            QString attrValue = attr.value();
+            if(attrName.compare("name") == 0)
 			{
 				skinName = attrValue;
 			}
@@ -1271,12 +1235,12 @@ bool KXmlUI::createSkinPool( QDomElement& xml )
 	return true;
 }
 
-QMetaObject * KXmlUI::getMetaObject( const char* className )
+QMetaObject * KXmlUI::getMetaObject( const QString& className )
 {
-	KWidgetHash::iterator iter = widgetHash()->find(QLatin1String(className));
+    KWidgetHash::iterator iter = widgetHash()->find(className);
 	if(iter == widgetHash()->end())
 	{
-		KWindowHash::Iterator iter = windowHash()->find(QLatin1String(className));
+        KWindowHash::Iterator iter = windowHash()->find(className);
 		if(iter == windowHash()->end())
 			return NULL;
 		KWindowCreatorBase *windowCreator = iter.value();
@@ -1286,29 +1250,26 @@ QMetaObject * KXmlUI::getMetaObject( const char* className )
 	return (QMetaObject*)widgetCreator->metaObject();
 }
 
-bool KXmlUI::setPropertyEx( QObject *obj, const char* name, const char* value )
+bool KXmlUI::setPropertyEx( QObject *obj, const QString& attrName, const QString& attrValue )
 {
-	QByteArray attrName = name;
-	QByteArray attrValue = value;
 	int dotIndex = attrName.lastIndexOf('.');
 	if(dotIndex == -1)
 	{
-		QVariant val = setProperty(obj, attrName, attrValue.data());
+        QVariant val = setProperty(obj, attrName, attrValue);
 	}
 	else
 	{
 		/*查找出内置对象*/
-		QList<QByteArray> extAtrs = attrName.split('.');
-		attrName[dotIndex] = '\0';
-		char *objName = attrName.data();
-		char *objAttr = objName + dotIndex + 1;
+        QList<QString> extAtrs = attrName.split('.');
+        QString objName = attrName.left(dotIndex);
+        QString objAttr = attrName.mid(dotIndex + 1);
 		QObject *objExt = NULL;
 		if(objExt == NULL)
 		{
 			QObject *itemOwner = obj;
 			for(int i = 0; i < extAtrs.count() - 1; i++)
 			{
-				QVariant varExt = itemOwner->property(extAtrs[i].data());
+                QVariant varExt = itemOwner->property(extAtrs[i].toLatin1().data());
 				objExt = varExt.value<QObject*>();
 				Q_ASSERT_X(objExt, __FUNCTION__, QString("bad property:%1.%2").arg(objName).arg(objAttr).toStdString().c_str());
 				if(objExt == NULL)
@@ -1318,33 +1279,31 @@ bool KXmlUI::setPropertyEx( QObject *obj, const char* name, const char* value )
 		}
 		if(objExt == NULL)
 			return false;
-		QVariant val = setProperty(objExt, objAttr, attrValue.data());
+        QVariant val = setProperty(objExt, objAttr, attrValue);
 	}
 	return true;
 }
 
-bool KXmlUI::setPropertyEx( QObject *obj, const char* name, const QVariant& val )
+bool KXmlUI::setPropertyEx( QObject *obj, const QString& attrName, const QVariant& val )
 {
-	QByteArray attrName = name;
 	int dotIndex = attrName.lastIndexOf('.');
 	if(dotIndex == -1)
 	{
-		return obj->setProperty(name, val);
+        return obj->setProperty(attrName.toLatin1().data(), val);
 	}
 	else
 	{
 		/*查找出内置对象*/
-		QList<QByteArray> extAtrs = attrName.split('.');
-		attrName[dotIndex] = '\0';
-		char *objName = attrName.data();
-		char *objAttr = objName + dotIndex + 1;
+        QList<QString> extAtrs = attrName.split('.');
+        QString objName = attrName.left(dotIndex);
+        QString objAttr = attrName.mid(dotIndex+1);
 		QObject *objExt = NULL;
 		if(objExt == NULL)
 		{
 			QObject *itemOwner = obj;
 			for(int i = 0; i < extAtrs.count() - 1; i++)
 			{
-				QVariant varExt = itemOwner->property(extAtrs[i].data());
+                QVariant varExt = itemOwner->property(extAtrs[i].toLatin1().data());
 				objExt = varExt.value<QObject*>();
 				Q_ASSERT_X(objExt, __FUNCTION__, QString("bad property:%1.%2").arg(objName).arg(objAttr).toStdString().c_str());
 				if(objExt == NULL)
@@ -1354,14 +1313,14 @@ bool KXmlUI::setPropertyEx( QObject *obj, const char* name, const QVariant& val 
 		}
 		if(objExt == NULL)
 			return false;
-		return objExt->setProperty(objAttr, val);
+        return objExt->setProperty(objAttr.toLatin1().data(), val);
 	}
 	return true;
 }
 
 
 
-/*                  KMethodInvokerOrg                             */
+/* KMethodInvokerOrg */
 
 KMethodInvokerOrg::KMethodInvokerOrg()
 {
@@ -1374,7 +1333,7 @@ KMethodInvokerOrg::~KMethodInvokerOrg()
 }
 
 
-void KMethodInvokerOrg::addReceiver( QObject* obj, const QString& sender, const QByteArray& signal, const QByteArray& slot, Qt::ConnectionType itype )
+void KMethodInvokerOrg::addReceiver( QObject* obj, const QString& sender, const QString& signal, const QString& slot, Qt::ConnectionType itype )
 {
 	EventReceiver eRecv;
 	eRecv.itype = itype;
@@ -1395,12 +1354,12 @@ void KMethodInvokerOrg::execute()
 		{
 			continue;
 		}
-		QObject::connect(objSender, er.signal.data(), er.obj, er.slot.data(), er.itype);
+        QObject::connect(objSender, er.signal.toLatin1().data(), er.obj, er.slot.toLatin1().data(), er.itype);
 	}
 	for(int i = 0; i < m_lstMethod.count(); i++)
 	{
 		MethodInvoker &mi = m_lstMethod[i];
-		QList<QByteArray> argvs = mi.argv.split(',');
+        QList<QString> argvs = mi.argv.split(',');
 		QList<QGenericArgument> lstArgvs;
 		QList<QVariant> lstVars;
 		QList<int> lstType;
@@ -1409,7 +1368,7 @@ void KMethodInvokerOrg::execute()
 		for(int j = 0; j < lstType.count(); j++)
 		{
 			int type_id = lstType[j];
-			if(type_id == QMetaType::QObjectStar || type_id == QMetaType::QWidgetStar)
+            if(type_id == QMetaType::QObjectStar)
 			{
 				QGenericArgument &argv = lstArgvs[j];
 				QVariant &val = lstVars[j];
@@ -1418,7 +1377,7 @@ void KMethodInvokerOrg::execute()
 				lstArgvs[j] = QGenericArgument(argv.name(), lstVars[j].data());
 			}
 		}
-		QMetaObject::invokeMethod(mi.obj, mi.invoke, mi.itype, lstArgvs[0],lstArgvs[1],lstArgvs[2],lstArgvs[3],lstArgvs[4],lstArgvs[5],lstArgvs[6],lstArgvs[7],lstArgvs[8],lstArgvs[9]);
+        QMetaObject::invokeMethod(mi.obj, mi.invoke.toLatin1().data(), mi.itype, lstArgvs[0],lstArgvs[1],lstArgvs[2],lstArgvs[3],lstArgvs[4],lstArgvs[5],lstArgvs[6],lstArgvs[7],lstArgvs[8],lstArgvs[9]);
 	}
 }
 
@@ -1433,7 +1392,7 @@ void KMethodInvokerOrg::addObject( const QString& objName, QObject *obj )
 	m_hashObjects.insert(objName, obj);
 }
 
-void KMethodInvokerOrg::addMethod( QObject *obj, const QByteArray& invoke, const QByteArray& argv, Qt::ConnectionType itype )
+void KMethodInvokerOrg::addMethod( QObject *obj, const QString& invoke, const QString& argv, Qt::ConnectionType itype )
 {
 	MethodInvoker mi;
 	mi.itype = itype;

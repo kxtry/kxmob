@@ -18,7 +18,9 @@ SOURCES += kxmob.cpp \
     kxmlui.cpp \
     kresource.cpp \
     kutility.cpp \
-    khelper.cpp
+    khelper.cpp \
+    ktheme.cpp \
+    colorspace.cpp
 
 PRECOMPILED_HEADER = stable.h
 
@@ -34,7 +36,9 @@ HEADERS += kxmob.h\
     kresource.h \
     kutility.h \
     khelper.h \
-    khelper_p.h
+    khelper_p.h \
+    ktheme.h \
+    colorspace.h
 
 unix {
     target.path = /usr/lib

@@ -35,9 +35,6 @@ public:
     static void osEnumFiles(const QString& path, QFileInfoList& fils, QStringList& fls);
     static void osRemoveDirectory(const QString& path, bool itself=true);
 
-    static PCHAR* CommandLineToArgvA(PCHAR CmdLine, int* _argc);
-    static PWCHAR * CommandLineToArgvW(PWCHAR CmdLine, int *_argc);
-
     static QStringList analyseHtmlImageList(const QString& html);
     static QByteArray fragmentsToByteArray(const QList<QPair<QString,QTextCharFormat>>& frags);
     static QList<QPair<QString,QTextCharFormat>> fragmentsFromByteArray(const QByteArray& bytes);
