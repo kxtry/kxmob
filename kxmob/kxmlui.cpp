@@ -612,7 +612,7 @@ bool KXmlUI::widgetFromMemory( const QByteArray& memory, KWidget *parent /*= NUL
     int errorLine;
     int errorColumn;
     QDomDocument xml;
-    if(!xml.setContent(memory, true, &errorStr, &errorLine, &errorColumn)){
+    if(!xml.setContent(memory, false, &errorStr, &errorLine, &errorColumn)){
         qDebug() << QObject::tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr);
         return false;
     }
@@ -651,7 +651,7 @@ KWindow* KXmlUI::windowFromMemory( const QByteArray& memory, QWidget *parent /*=
     int errorLine;
     int errorColumn;
     QDomDocument xml;
-    if(!xml.setContent(memory, true, &errorStr, &errorLine, &errorColumn)){
+    if(!xml.setContent(memory, false, &errorStr, &errorLine, &errorColumn)){
         qDebug() << QObject::tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr);
         return false;
     }
@@ -1050,7 +1050,7 @@ bool KXmlUI::initSkin( const QString& file )
 		Q_ASSERT_X(false, __FUNCTION__, "xml file error!");
 		return false;
 	}
-    QDomElement root = xml.firstChildElement();
+    QDomElement root = xml.documentElement();
     return initSkin(root);
 }
 
@@ -1060,12 +1060,12 @@ bool KXmlUI::initSkin( const QByteArray& memory )
     int errorLine;
     int errorColumn;
     QDomDocument xml;
-    if(!xml.setContent(memory, true, &errorStr, &errorLine, &errorColumn)){
+    if(!xml.setContent(memory, false, &errorStr, &errorLine, &errorColumn)){
         qDebug() << QObject::tr("Parse error at line %1, column %2:\n%3").arg(errorLine).arg(errorColumn).arg(errorStr);
         return false;
     }
 
-    QDomElement root = xml.firstChildElement();
+    QDomElement root = xml.documentElement();
     return initSkin(root);
 }
 
