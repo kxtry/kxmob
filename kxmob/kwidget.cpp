@@ -5,7 +5,10 @@
 #include "kwidget.h"
 #include "kwidget_p.h"
 
+#include "kxmlui.h"
+#include "ktheme.h"
 
+KX_WIDGET_CREATOR_GLOBAL_STATIC(KWidget)
 
 KWidgetPrivate::KWidgetPrivate()
 {

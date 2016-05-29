@@ -1,13 +1,13 @@
 ﻿#include "stable.h"
 #include "kwindow.h"
 #include "kspacer.h"
-//#include "kxmlui.h"
+#include "kxmlui.h"
 
-//#include "ktheme.h"
+#include "ktheme.h"
 
 #include "kwindow_p.h"
 
-//KX_WINDOW_CREATOR_GLOBAL_STATIC(KWindow);
+KX_WINDOW_CREATOR_GLOBAL_STATIC(KWindow);
 
 
 KWindowPrivate::KWindowPrivate()

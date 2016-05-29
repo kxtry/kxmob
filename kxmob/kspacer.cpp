@@ -1,10 +1,10 @@
 ﻿#include "stable.h"
 
 #include "kspacer.h"
-//#include "kxmlui.h"
+#include "kxmlui.h"
 
 
-//KX_WIDGET_CREATOR_GLOBAL_STATIC(KSpacer)
+KX_WIDGET_CREATOR_GLOBAL_STATIC(KSpacer)
 
 KSpacer::KSpacer( QGraphicsItem *parent ) 
 : KWidget(parent)

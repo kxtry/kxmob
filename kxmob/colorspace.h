@@ -36,7 +36,7 @@ namespace KHSL
 	HSL:的整数取值范围是：Hue:0~360,S:0~100,L:0~100
 	*/
 	void Rgb2Hsl(QRgb colorrgb,float *h,float *s,float *l);
-    void Hsl2Rgb(float hh,float ss,float ll, unsigned short a,QRgb *colorrgb);
+    void Hsl2Rgb(float hh,float ss,float ll,quint16 a,QRgb *colorrgb);
 	QImage CreateColorTable(int width, int height, float s);
 	void UpdateColorTable(QImage& img, float s);
 	QImage CreateColorBar(int width, int height, float h, float l);

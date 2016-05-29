@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<uitree>
+	  <KWindow objectName="UiShower" fontName="微软雅黑" size="400,300">
+	      <KWidget backgroundColor="255,0,255,50" layout="VBox">
+	      </KWidget>
+	  </KWindow>
+	</uitree>
+	<uihelper>
+	  <KHelper targetPath="A/btnWindowCreate"/>
+	</uihelper>
+</root>

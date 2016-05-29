@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>uishower.xml</file>
+    </qresource>
+</RCC>

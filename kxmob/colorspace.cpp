@@ -169,9 +169,9 @@ inline quint32 BGR2RGB( quint32 bgr )
 }
 
 void RGBF2HSL(float r, float g, float b, float *h,float *s,float *l);
-void HSL2RGBF(float hh,float ss,float ll,unsigned short a, float &r, float &g, float &b);
+void HSL2RGBF(float hh,float ss,float ll,quint16 a, float &r, float &g, float &b);
 void RGB2HSL(QRgb colorrgb,float *h,float *s,float *l);
-void HSL2RGB(float hh,float ss,float ll,unsigned short a,QRgb *colorrgb);
+void HSL2RGB(float hh,float ss,float ll,quint16 a,QRgb *colorrgb);
 
 static float CalPowl( float SourceL)
 {
@@ -191,7 +191,7 @@ void RGB2HSL( QRgb colorrgb,float *h,float *s,float *l )
 	RGBF2HSL( r, g, b, h, s, l );
 }
 
-void HSL2RGB( float hh,float ss,float ll, unsigned short a, QRgb *colorrgb )
+void HSL2RGB( float hh,float ss,float ll,quint16 a, QRgb *colorrgb )
 {
 	float R, G, B;
 	HSL2RGBF( hh, ss, ll, a, R, G, B );
@@ -200,10 +200,10 @@ void HSL2RGB( float hh,float ss,float ll, unsigned short a, QRgb *colorrgb )
 	G = G*255.0f;   
 
 	B = B*255.0f;   
-	*colorrgb = ( static_cast<BYTE>(a)<<24 ) |
-		( static_cast<BYTE>((R>255)? 255 : ((R<0)?0 : R))) |
-		( static_cast<BYTE>((G>255)? 255 : ((G<0)?0 : G))<<8 ) |
-		( static_cast<BYTE>((B>255)? 255 : ((B<0)?0 : B))<<16 );
+    *colorrgb = ( static_cast<quint8>(a)<<24 ) |
+        ( static_cast<quint8>((R>255)? 255 : ((R<0)?0 : R))) |
+        ( static_cast<quint8>((G>255)? 255 : ((G<0)?0 : G))<<8 ) |
+        ( static_cast<quint8>((B>255)? 255 : ((B<0)?0 : B))<<16 );
 }
 
 void RGBF2HSL( float r, float g, float b, float *h,float *s,float *l )
@@ -271,7 +271,7 @@ void RGBF2HSL( float r, float g, float b, float *h,float *s,float *l )
 	}
 }
 
-void HSL2RGBF( float hh,float ss,float ll, unsigned short a, float &r, float &g, float &b )
+void HSL2RGBF( float hh,float ss,float ll,quint16 a, float &r, float &g, float &b )
 {
 	float h = hh;                  // h must be [0, 360]   
 
@@ -370,7 +370,7 @@ void Rgb2Hsl( QRgb colorrgb,float *h,float *s,float *l )
 	RGB2HSL(colorrgb, h, s, l);
 }
 
-void Hsl2Rgb( float hh,float ss,float ll,WORD a,QRgb *colorrgb )
+void Hsl2Rgb( float hh,float ss,float ll,quint16 a,QRgb *colorrgb )
 {
 	HSL2RGB(hh, ss, ll, a, colorrgb);
 }
@@ -451,14 +451,14 @@ void UpdateColorTable( QImage& img, float s )
 {
 	int width = img.width();
 	int height = img.height();
-	UINT *pPixel = (UINT*)img.bits();
-	UINT stride = img.bytesPerLine() * 8 / img.depth();
+    quint32 *pPixel = (quint32*)img.bits();
+    quint32 stride = img.bytesPerLine() * 8 / img.depth();
 	QRgb ref = 0;
 	float yP = (float)height / 100.0f;
 	float xP = (float)width / 360.0f;
 	for ( int j = 0; j < height; ++j )
 	{
-		UINT *pLine = pPixel + j * stride;
+        quint32 *pLine = pPixel + j * stride;
 		for ( int i = 0; i < width; ++i )
 		{
 			HSL2RGB( ((float)i)/xP, s, ((float)j)/yP, 0, &ref );
@@ -478,8 +478,8 @@ void UpdateColorBar( QImage& img, float h, float l )
 {
 	int width = img.width();
 	int height = img.height();
-	UINT *pPixel = (UINT*)img.bits();
-	UINT stride = img.bytesPerLine() * 8 / img.depth();
+    quint32 *pPixel = (quint32*)img.bits();
+    quint32 stride = img.bytesPerLine() * 8 / img.depth();
 	float xP = (float)width / 100.0f;
 	QRgb ref;
 	for ( int i = 0; i < width; ++i )
