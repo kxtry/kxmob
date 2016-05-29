@@ -25,48 +25,48 @@ class KHelperCreatorBase;
 class KXFW_API KHelperCreatorBase
 {
 public:
-	KHelperCreatorBase(const char* objectClassName);
+    KHelperCreatorBase(const QString& objectClassName);
 	virtual ~KHelperCreatorBase();
-	const char* className() const;
+    QString className() const;
 	virtual KHelper *create(QObject *parent) const = 0;
 	virtual const QMetaObject *metaObject() const = 0;
 
 private:
-	const QLatin1String m_className;
+    QString m_className;
 };
 
 class KXFW_API KWidgetCreatorBase
 {
 public:
-    KWidgetCreatorBase(const char* widgetClassName);
+    KWidgetCreatorBase(const QString& widgetClassName);
     virtual ~KWidgetCreatorBase();
-	const char* className() const;
+    QString className() const;
     virtual KWidget *create(QGraphicsItem *parent) const = 0;
     virtual const QMetaObject *metaObject() const = 0;
 
 private:
-    const QLatin1String m_className;
+    QString m_className;
 };
 
 class KXFW_API KWindowCreatorBase
 {
 public:
-	KWindowCreatorBase(const char* windowClassName);
+    KWindowCreatorBase(const QString& windowClassName);
 
 	virtual ~KWindowCreatorBase();
-	const char* className() const;
+    QString className() const;
 	virtual KWindow *create(QWidget *parent) const = 0;
 	virtual const QMetaObject *metaObject() const = 0;
 
 private:
-	QLatin1String m_className;
+    QString m_className;
 };
 
 template<class T, class TBase, class TRoot, class TCreator>
 class KCreator : public TCreator
 {
 public:
-	KCreator(const char* className) : TCreator(className)
+    KCreator(const QString& className) : TCreator(className)
 	{
 	}
 
@@ -130,8 +130,8 @@ public:
     static KXFW_API bool widgetFromMemory(const QByteArray& memory, KWidget *parent = NULL );
 	static KXFW_API KWindow* windowFromFile(const QString& file, QWidget *parent = NULL);
 	static KXFW_API KWindow* windowFromMemory(const QByteArray& memory, QWidget *parent = NULL);
-	static KXFW_API bool setPropertyEx(QObject *obj, const char* name, const char* value);
-	static KXFW_API bool setPropertyEx(QObject *obj, const char* name, const QVariant& val);
+    static KXFW_API bool setPropertyEx(QObject *obj, const QString& name, const QString& value);
+    static KXFW_API bool setPropertyEx(QObject *obj, const QString& name, const QVariant& val);
 
 public:
 	static void setSkin(QObject *objItem, const QString& skin);
@@ -145,8 +145,8 @@ private:
     static bool createChild(QDomElement& child, KWidget *parent);
     static void setProperties(QDomElement& child, QObject* item);
 	static QVariant setProperty(QObject *objItem, const char* attrName, const char* attrValue);
-	static KWindow *createWindow(const char* className, QWidget *parent);
-	static KWidget *createWidget(const char *className, KWidget *parent);
+    static KWindow *createWindow(const QString& className, QWidget *parent);
+    static KWidget *createWidget(const QString& className, KWidget *parent);
     static bool setDefaultDataProperty(QObject *widget, QDomElement child);
 	/*设置事件*/
     static void connectSlot(QObject *obj, QDomElement& node);
@@ -159,7 +159,7 @@ private:
     //uihelper
     static bool executeUIHelperFromXml(QDomElement& xml, QObject *parent);
     static bool executeHelper(QDomElement& child, QObject *parent, QObject *root);
-    static KHelper *createHelper(const char *className, QObject *parent);
+    static KHelper *createHelper(const QString& className, QObject *parent);
 
 	/*skin*/
     static bool initSkin(QDomElement& root);

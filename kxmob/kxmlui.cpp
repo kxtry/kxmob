@@ -28,9 +28,9 @@
 typedef QVariant (*PFUNObjectPropertyCreator)(const QString &value);
 typedef QHash<int, PFUNObjectPropertyCreator> KPropertyHash;
 
-typedef QHash<QLatin1String, KHelperCreatorBase*> KHelperHash;
-typedef QHash<QLatin1String, KWidgetCreatorBase*> KWidgetHash;
-typedef QHash<QLatin1String, KWindowCreatorBase*> KWindowHash;
+typedef QHash<QString, KHelperCreatorBase*> KHelperHash;
+typedef QHash<QString, KWidgetCreatorBase*> KWidgetHash;
+typedef QHash<QString, KWindowCreatorBase*> KWindowHash;
 
 struct SkinData
 {
@@ -72,7 +72,7 @@ KSkinHash *skinHash()
 	return _skinHash();
 }
 
-KHelperCreatorBase::KHelperCreatorBase( const char* objectClassName ) : m_className(objectClassName)
+KHelperCreatorBase::KHelperCreatorBase( const QString& objectClassName ) : m_className(objectClassName)
 {
 	helperHash()->insert(m_className, this);
 }
@@ -82,12 +82,12 @@ KHelperCreatorBase::~KHelperCreatorBase()
 	helperHash()->remove(m_className);
 }
 
-const char* KHelperCreatorBase::className() const
+QString KHelperCreatorBase::className() const
 {
-	return m_className.latin1();
+    return m_className;
 }
 
-KWidgetCreatorBase::KWidgetCreatorBase( const char* widgetClassName ) : m_className(widgetClassName)
+KWidgetCreatorBase::KWidgetCreatorBase( const QString& widgetClassName ) : m_className(widgetClassName)
 {
 	widgetHash()->insert(m_className, this);
 }
@@ -97,12 +97,12 @@ KWidgetCreatorBase::~KWidgetCreatorBase()
 	widgetHash()->remove(m_className);
 }
 
-const char* KWidgetCreatorBase::className() const
+QString KWidgetCreatorBase::className() const
 {
-	return m_className.latin1();
+    return m_className;
 }
 
-KWindowCreatorBase::KWindowCreatorBase( const char* windowClassName ) : m_className(windowClassName)
+KWindowCreatorBase::KWindowCreatorBase( const QString& windowClassName ) : m_className(windowClassName)
 {
 	windowHash()->insert(m_className, this);
 }
@@ -112,9 +112,9 @@ KWindowCreatorBase::~KWindowCreatorBase()
 	windowHash()->remove(m_className);
 }
 
-const char* KWindowCreatorBase::className() const
+QString KWindowCreatorBase::className() const
 {
-	return m_className.latin1();
+    return m_className;
 }
 
 
@@ -129,16 +129,16 @@ template <typename type>
 class PropertyConvertor
 {
 public:
-	PropertyConvertor(const char* name, PFUNObjectPropertyCreator fun)
+    PropertyConvertor(const QString& name, PFUNObjectPropertyCreator fun)
 	{
-		type_id = QVariant::nameToType(name);
+        type_id = QVariant::nameToType(name.toLatin1().constData());
 		if(type_id == QVariant::UserType)
 		{
-			type_id = QMetaType::type(name);
+            type_id = QMetaType::type(name.toLatin1().constData());
 		}
 		else if(type_id == QVariant::Invalid)
 		{
-			type_id = qRegisterMetaType<type>(name);
+            type_id = qRegisterMetaType<type>(name.toLatin1().constData());
 		}
 		propertyHash()->insert(type_id, fun);
 	}
@@ -159,7 +159,7 @@ private:
 
 /*                    ArgumentConvert                                   */
 
-QGenericArgument variant2Argument( const char* typeName, int type_id, QVariant& v )
+QGenericArgument variant2Argument( const QString& typeName, int type_id, QVariant& v )
 {
 	void *dataPtr = v.data();
     if(type_id == QMetaType::QObjectStar || type_id == QMetaType::VoidStar)
@@ -175,7 +175,7 @@ QGenericArgument variant2Argument( const char* typeName, int type_id, QVariant& 
 		/*转换失败。*/
 		return QGenericArgument();
 	}
-	return QGenericArgument(typeName, dataPtr);
+    return QGenericArgument(typeName.toLatin1().constData(), dataPtr);
 }
 
 /*                     PropertyConvert		                            */
@@ -687,20 +687,19 @@ bool KXmlUI::createUITreeFromXml( QDomElement& node, KWidget *parent )
 	return true;
 }
 
-KWindow* KXmlUI::createUITreeFromXml( QDomElement& xml, QWidget *parent )
+KWindow* KXmlUI::createUITreeFromXml( QDomElement& node, QWidget *parent )
 {
-	XMLNode child = xml.getChildNodeByPath("uitree");
+    QDomElement uitree = node.firstChildElement("uitree");
 
-	if (child.isEmpty())
-	{
-		Q_ASSERT_X(false, __FUNCTION__, "has no uitree child.");
-		return false;
-	}
+    if (uitree.isNull())
+    {
+        Q_ASSERT_X(false, __FUNCTION__, "has no ui child.");
+        return false;
+    }
 
-	int count = child.nChildNode();
-	Q_ASSERT_X(count == 1, __FUNCTION__, "more than one child.");
-	XMLNode topNode = child.getChildNode(0);
-	const char *className = topNode.getName();
+    QDomElement topNode = uitree.firstChildElement();
+
+    QString className = topNode.tagName();
 	KWindow *window = createWindow(className, parent);
 	if(window == NULL)
 		return NULL;
