@@ -1,10 +1,12 @@
-#ifndef _KLINEEDIT_H_
+﻿#ifndef _KLINEEDIT_H_
 #define _KLINEEDIT_H_
 
 #include "kxapi.h"
 #include "kwidget.h"
 
 class KLineEditPrivate;
+
+#include <QLineEdit>
 
 
 class KXFW_API KLineEdit : public KWidget
