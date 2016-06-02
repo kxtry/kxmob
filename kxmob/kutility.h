@@ -69,26 +69,26 @@ public:
     static bool hasWindowStartRun(const QString& name);
 
 
-    static void drawOneTopLeft(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawOneTopRight(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawOneBotLeft(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawOneBotRight(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawOneHCenter(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawOneVCenter(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawOneHVCenter(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawTileH(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawTileV(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawTileHV(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawStretchH(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawStretchV(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawStretchHV(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawStretchHTwo(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawStretchHMiddle(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawStretchVTwo(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawStretchVMiddle(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
-    static void drawGridFour(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawGridFrameFour(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
-    static void drawGridNine(QPainter *painter, QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneTopLeft(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneTopRight(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneBotLeft(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneBotRight(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneHCenter(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneVCenter(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawOneHVCenter(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawTileH(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawTileV(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawTileHV(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawStretchH(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawStretchV(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawStretchHV(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawStretchHTwo(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawStretchHMiddle(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawStretchVTwo(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawStretchVMiddle(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth);
+    static void drawGridFour(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawGridFrameFour(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
+    static void drawGridNine(QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap);
 
 };
 

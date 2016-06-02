@@ -449,54 +449,54 @@ void KUtility::CopyVS2008ManifestFiles(const QString& dstPath)
 	}
 }
 
-void KUtility::drawOneTopLeft( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneTopLeft( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	painter->drawPixmap(itemRt.topLeft(), pixmap, srcRt);
 }
 
-void KUtility::drawOneTopRight( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneTopRight( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	painter->drawPixmap(itemRt.topLeft() + QPointF(itemRt.width() - srcRt.width(), 0), pixmap, srcRt);
 }
 
-void KUtility::drawOneBotLeft( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneBotLeft( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
 	painter->drawPixmap(itemRt.topLeft() + QPointF(0, itemRt.height() - srcRt.height()), pixmap, srcRt);
 }
 
-void KUtility::drawOneBotRight( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneBotRight( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
 	painter->drawPixmap(itemRt.topLeft() + QPointF(itemRt.width() - srcRt.width(), itemRt.height() - srcRt.height()), pixmap, srcRt);
 }
 
-void KUtility::drawOneHCenter( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneHCenter( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
 	painter->drawPixmap(itemRt.topLeft() + QPointF((itemRt.width() - srcRt.width()) / 2, 0), pixmap, srcRt);
 }
 
-void KUtility::drawOneVCenter( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneVCenter( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
 	painter->drawPixmap(itemRt.topLeft() + QPointF(0, (itemRt.height() - srcRt.height()) / 2), pixmap, srcRt);	
 }
 
-void KUtility::drawOneHVCenter( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawOneHVCenter( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	
 	painter->drawPixmap(itemRt.topLeft() + QPointF((itemRt.width() - srcRt.width()) / 2, (itemRt.height() - srcRt.height()) / 2), pixmap, srcRt);
 }
 
-void KUtility::drawTileH( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawTileH( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
@@ -510,7 +510,7 @@ void KUtility::drawTileH( QPainter *painter, QRectF& itemRt, const QPixmap& pixm
 	}
 }
 
-void KUtility::drawTileV( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawTileV( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
@@ -524,7 +524,7 @@ void KUtility::drawTileV( QPainter *painter, QRectF& itemRt, const QPixmap& pixm
 	}
 }
 
-void KUtility::drawTileHV( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawTileHV( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 
@@ -542,7 +542,7 @@ void KUtility::drawTileHV( QPainter *painter, QRectF& itemRt, const QPixmap& pix
 	}
 }
 
-void KUtility::drawStretchH( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
+void KUtility::drawStretchH( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRectF drawRt(0, 0, itemRt.width(), srcRt.height());
@@ -552,7 +552,7 @@ void KUtility::drawStretchH( QPainter *painter, QRectF& itemRt, const QPixmap& p
 	painter->setRenderHint(QPainter::SmoothPixmapTransform, !bsmooth);
 }
 
-void KUtility::drawStretchV( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
+void KUtility::drawStretchV( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRectF drawRt(0, 0, pixmap.width(), itemRt.height());
@@ -562,7 +562,7 @@ void KUtility::drawStretchV( QPainter *painter, QRectF& itemRt, const QPixmap& p
 	painter->setRenderHint(QPainter::SmoothPixmapTransform, !bsmooth);
 }
 
-void KUtility::drawStretchHV( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
+void KUtility::drawStretchHV( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRectF drawRt(0, 0, itemRt.width(), itemRt.height());
@@ -572,7 +572,7 @@ void KUtility::drawStretchHV( QPainter *painter, QRectF& itemRt, const QPixmap& 
 	painter->setRenderHint(QPainter::SmoothPixmapTransform, !bsmooth);	
 }
 
-void KUtility::drawStretchHTwo( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
+void KUtility::drawStretchHTwo( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRectF drawRt;
@@ -597,7 +597,7 @@ void KUtility::drawStretchHTwo( QPainter *painter, QRectF& itemRt, const QPixmap
 	}
 }
 
-void KUtility::drawStretchHMiddle( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth)
+void KUtility::drawStretchHMiddle( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth)
 {
 	QRectF srcRt(0, 0, pixmap.width()/2, pixmap.height());
 	QRectF drawRt;
@@ -617,7 +617,7 @@ void KUtility::drawStretchHMiddle( QPainter *painter, QRectF& itemRt, const QPix
 	}
 }
 
-void KUtility::drawStretchVTwo( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
+void KUtility::drawStretchVTwo( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRectF drawRt;
@@ -642,7 +642,7 @@ void KUtility::drawStretchVTwo( QPainter *painter, QRectF& itemRt, const QPixmap
 	}
 }
 
-void KUtility::drawStretchVMiddle( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
+void KUtility::drawStretchVMiddle( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap, bool bsmooth )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height()/2);
 	QRectF drawRt;
@@ -662,7 +662,7 @@ void KUtility::drawStretchVMiddle( QPainter *painter, QRectF& itemRt, const QPix
 	}
 }
 
-void KUtility::drawGridFour( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawGridFour( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRect dstRt = itemRt.toRect();
@@ -707,7 +707,7 @@ void KUtility::drawGridFour( QPainter *painter, QRectF& itemRt, const QPixmap& p
 	painter->drawPixmap(drawRt, pixmap, blockRt);
 }
 
-void KUtility::drawGridFrameFour( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawGridFrameFour( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 	QRect dstRt = itemRt.toRect();
@@ -754,7 +754,7 @@ void KUtility::drawGridFrameFour( QPainter *painter, QRectF& itemRt, const QPixm
 	painter->drawPixmap(drawRt, pixmap, blockRt);
 }
 
-void KUtility::drawGridNine( QPainter *painter, QRectF& itemRt, const QPixmap& pixmap )
+void KUtility::drawGridNine( QPainter *painter, const QRectF& itemRt, const QPixmap& pixmap )
 {
 	QRectF srcRt(0, 0, pixmap.width(), pixmap.height());
 

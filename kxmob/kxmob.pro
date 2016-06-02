@@ -20,7 +20,13 @@ SOURCES += kxmob.cpp \
     kutility.cpp \
     khelper.cpp \
     ktheme.cpp \
-    colorspace.cpp
+    colorspace.cpp \
+    kimageitem.cpp \
+    klabel.cpp \
+    klineedit.cpp \
+    qlineeditex.cpp \
+    kframeitem.cpp \
+    ktextitem.cpp
 
 PRECOMPILED_HEADER = stable.h
 
@@ -38,7 +44,13 @@ HEADERS += kxmob.h\
     khelper.h \
     khelper_p.h \
     ktheme.h \
-    colorspace.h
+    colorspace.h \
+    kimageitem.h \
+    klabel.h \
+    klineedit.h \
+    qlineeditex.h \
+    kframeitem.h \
+    ktextitem.h
 
 unix {
     target.path = /usr/lib
