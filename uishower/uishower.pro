@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,18 +18,12 @@ SOURCES += main.cpp\
 
 HEADERS  += widget.h
 
+RESOURCES += \
+    uishower.qrc
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../kxmob/release/ -lkxmob
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../kxmob/debug/ -lkxmob
-else:unix:!macx: LIBS += -L$$OUT_PWD/../kxmob/ -lkxmob
+else:unix: LIBS += -L$$OUT_PWD/../kxmob/ -lkxmob
 
 INCLUDEPATH += $$PWD/../kxmob
 DEPENDPATH += $$PWD/../kxmob
-
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../kxmob/release/libkxmob.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../kxmob/debug/libkxmob.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../kxmob/release/kxmob.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../kxmob/debug/kxmob.lib
-else:unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../kxmob/libkxmob.a
-
-RESOURCES += \
-    uishower.qrc

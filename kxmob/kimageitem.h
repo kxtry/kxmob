@@ -16,7 +16,7 @@ public:
 	Q_PROPERTY(bool autoAdjust READ autoAdjust WRITE setAutoAdjust)
 	Q_PROPERTY(bool handHover READ handHover WRITE setHandHover)
 	Q_PROPERTY(bool acceptClick READ acceptClick WRITE setAcceptClick)
-	Q_PROPERTY(QMargins imageMargins READ imageMargins WRITE setImageMargins);
+    Q_PROPERTY(QMargins imageMargins READ imageMargins WRITE setImageMargins);
 	Q_PROPERTY(Qt::Alignment imageAlignment READ imageAlignment WRITE setImageAlignment)
 	Q_PROPERTY(QColor effectColor READ effectColor WRITE setEffectColor)
 	Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor)

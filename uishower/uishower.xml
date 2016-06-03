@@ -3,6 +3,8 @@
 	<uitree>
 	  <KWindow objectName="UiShower" fontName="微软雅黑" size="400,300">
 	      <KWidget backgroundColor="255,0,255,50" layout="VBox">
+                    <KSpacer/>
+                    <KLineEdit fixHeight="50" text="abc"/>
 	      </KWidget>
 	  </KWindow>
 	</uitree>

@@ -9,7 +9,10 @@ QT += widgets xml
 TARGET = kxmob
 TEMPLATE = lib
 
+#CONFIG += staticlib
+
 DEFINES += KXFW_LIB
+DEFINES += KXFW_STATICLIBA
 
 SOURCES += kxmob.cpp \
     kwidget.cpp \

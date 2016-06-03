@@ -9,7 +9,7 @@ class QGraphicsView;
 class KWindow;
 class KHelper;
 class QWidget;
-struct QDomElement;
+class QDomElement;
 
 class KWidgetCreatorBase;
 class KWindowCreatorBase;

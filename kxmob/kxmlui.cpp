@@ -9,6 +9,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomAttr>
+#include <QDomNamedNodeMap>
 
 
 #define INVOKE_FUNCTION_PROPERTY	("function")

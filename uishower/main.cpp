@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     KxMob::init();
 
-    KWindow *window = KXmlUI::windowFromFile("D:\\kxtry.work\\kxmob\\uishower\\uishower.xml");
+    KWindow *window = KXmlUI::windowFromFile(":/uishower.xml");
     window->show();
 
     return a.exec();
